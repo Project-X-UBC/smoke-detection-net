@@ -26,7 +26,7 @@ def register_imagenet_instances(name, metadata, json_file):
 
 # TODO could improve this by removing hardcoded stuff
 # Update info
-_root = os.getenv("DETECTRON2_DATASETS", "../data")
+_root = os.getenv("DETECTRON2_DATASETS", "data")
 imagenet_train_annotation_file = os.path.join(_root, "train.json")
 imagenet_val_annotation_file = os.path.join(_root, "val.json")
 

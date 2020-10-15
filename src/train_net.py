@@ -18,10 +18,10 @@ from detectron2.evaluation import (
     verify_results,
 )
 
-from imgcls.config import get_cfg
-import imgcls.modeling  # need this import to initialize modeling package
-from imgcls.data import DatasetMapper
-from imgcls.evaluation.imagenet_evaluation import ImageNetEvaluator
+from src.imgcls.config import get_cfg
+import src.imgcls.modeling  # need this import to initialize modeling package
+from src.imgcls.data import DatasetMapper
+from src.imgcls.evaluation.imagenet_evaluation import ImageNetEvaluator
 
 
 class Trainer(DefaultTrainer):
@@ -88,7 +88,7 @@ def run(args):
 def main():
     # FIXME hardcoded args
     args = default_argument_parser().parse_args()
-    args.config_file = "./config.yaml"
+    args.config_file = "src/config.yaml"
     args.num_gpus = 1
     print("Command Line Args: ", args)
     # launch multi-gpu or distributed training

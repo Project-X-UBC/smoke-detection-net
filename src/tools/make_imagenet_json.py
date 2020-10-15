@@ -59,7 +59,7 @@ def accumulate_imagenet_json(image_root, phase):
         # height, width = cv2.imread(filename).shape[:2]
 
         record = {
-            "file_path": os.path.abspath(filename),  # Using abs path, ignore image root, less flexibility
+            "file_name": os.path.abspath(filename),  # Using abs path, ignore image root, less flexibility
             "image_id": idx,  # fake data only has a max of 1 transformed grid segment
             "label": get_multi_label_array(imgs_anns[v]["index"]),
         }

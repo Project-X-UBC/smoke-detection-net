@@ -40,7 +40,7 @@ class ImageNetEvaluator(DatasetEvaluator):
 
     def process(self, inputs, outputs):
         for input, output in zip(inputs, outputs):
-            prediction = {"file_path": input["file_path"], "image_id": input["image_id"], "label": input["label"],
+            prediction = {"file_path": input["file_name"], "image_id": input["image_id"], "label": input["label"],
                           "pred": output["pred"].to(self._cpu_device)}
             self._predictions.append(prediction)
 
