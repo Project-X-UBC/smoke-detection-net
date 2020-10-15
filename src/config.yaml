@@ -1,0 +1,27 @@
+# description of entire config https://detectron2.readthedocs.io/modules/config.html#config-references
+MODEL:
+  BACKBONE:
+    NAME: "build_mnetv1_backbone" # MobileNetV1
+    FREEZE_AT: 0 # freezing a layer means setting the requires_grad to False
+  MNET:
+    OUT_FEATURES: ['linear']
+    WIDTH_MULT: 0.25 # Width multiplier - adjusts number of channels in each layer by this amount
+  CLSNET:
+    ENABLE: True
+    NUM_CLASSES: 16
+    INPUT_SIZE: 224 # resizes image to 224x224
+
+DATASETS:
+  TRAIN: ("smokenet_train", )
+  TEST: ("smokenet_val", )
+DATALOADER:
+  ASPECT_RATIO_GROUPING: False # whether to group images with similar aspect ratio for efficiency
+  NUM_WORKERS: 4 # number of parallel data loading workers
+SOLVER:
+  BASE_LR: 0.1
+  STEPS: (150000, 180000) # The iteration number to decrease learning rate by GAMMA
+  MAX_ITER: 20 # maximum number of iterations
+INPUT:
+  CROP:
+    ENABLED: False
+VERSION: 2
