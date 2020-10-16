@@ -23,7 +23,7 @@ class ClsNet(nn.Module):
         self.num_classes = cfg.MODEL.CLSNET.NUM_CLASSES
         self.in_features = cfg.MODEL.CLSNET.IN_FEATURES
         self.bottom_up = build_backbone(cfg)
-        self.criterion = nn.BCELoss()  # loss for multi-label classification
+        self.criterion = nn.BCELoss()  # loss for multi-label classification TODO: use BCEWithLogitsLoss
 
         self.register_buffer("pixel_mean", torch.Tensor(cfg.MODEL.PIXEL_MEAN).view(-1, 1, 1))
         self.register_buffer("pixel_std", torch.Tensor(cfg.MODEL.PIXEL_STD).view(-1, 1, 1))

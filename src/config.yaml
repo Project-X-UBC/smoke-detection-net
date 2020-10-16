@@ -1,29 +1,29 @@
-# description of entire config https://detectron2.readthedocs.io/modules/config.html#config-references
-MODEL:
-  META_ARCHITECTURE: "ClsNet"
-  BACKBONE:
-    NAME: "build_mnetv1_backbone" # MobileNetV1
-    FREEZE_AT: 0 # freezing a layer means setting the requires_grad to False
-  MNET:
-    OUT_FEATURES: ['linear']
-    WIDTH_MULT: 0.25 # Width multiplier - adjusts number of channels in each layer by this amount
-  CLSNET:
-    ENABLE: True
-    NUM_CLASSES: 16
-    INPUT_SIZE: 224 # resizes image to 224x224
-
-DATASETS:
-  TRAIN: ("smokenet_train", )
-  TEST: ("smokenet_val", )
 DATALOADER:
-  ASPECT_RATIO_GROUPING: False # whether to group images with similar aspect ratio for efficiency
-  NUM_WORKERS: 4 # number of parallel data loading workers
-SOLVER:
-  IMS_PER_BATCH: 64
-  BASE_LR: 0.1
-  STEPS: (150000, 180000) # The iteration number to decrease learning rate by GAMMA
-  MAX_ITER: 20 # maximum number of iterations
+  ASPECT_RATIO_GROUPING: false
+  NUM_WORKERS: 4
+DATASETS:
+  TEST: ("smokenet_val", )
+  TRAIN: ("smokenet_train", )
 INPUT:
   CROP:
-    ENABLED: False
+    ENABLED: false
+MODEL:
+  BACKBONE:
+    FREEZE_AT: 0
+    NAME: build_mnetv1_backbone
+  CLSNET:
+    ENABLE: true
+    INPUT_SIZE: 224
+    NUM_CLASSES: 16
+  META_ARCHITECTURE: ClsNet
+  MNET:
+    OUT_FEATURES:
+    - linear
+    WIDTH_MULT: 0.25
+OUTPUT_DIR: /Users/rodriguedeschaetzen/project_x/smoke-detection-net/output
+SOLVER:
+  BASE_LR: 0.1
+  IMS_PER_BATCH: 64
+  MAX_ITER: 101
+  STEPS: (150000, 180000)
 VERSION: 2

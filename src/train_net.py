@@ -21,6 +21,7 @@ from detectron2.evaluation import (
 from src.imgcls.config import get_cfg
 import src.imgcls.modeling  # need this import to initialize modeling package
 from src.imgcls.data import DatasetMapper
+from src.imgcls.data.imagenet import register_imagenet_instances
 from src.imgcls.evaluation.imagenet_evaluation import ImageNetEvaluator
 
 
@@ -54,13 +55,22 @@ class Trainer(DefaultTrainer):
 
 def setup(args):
     """
-    Create configs and perform basic setups.
+    Create configs, perform basic setups, and register dataset instances
     """
     cfg = get_cfg()
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
     default_setup(cfg, args)
+
+    # TODO: register third dataset for test.json
+    train_annotation_file = os.path.join(cfg.DATA_DIR_PATH, "train.json")
+    val_annotation_file = os.path.join(cfg.DATA_DIR_PATH, "val.json")
+
+    # Register into DatasetCatalog
+    register_imagenet_instances("smokenet_train", {}, train_annotation_file)
+    register_imagenet_instances("smokenet_val", {}, val_annotation_file)
+
     return cfg
 
 

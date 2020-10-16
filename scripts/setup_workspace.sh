@@ -22,12 +22,12 @@ python -m detectron2.utils.collect_env
 # install rest of dependencies
 conda env update --name projectx --file env.yml
 
-# download the fake data
-gdown https://drive.google.com/uc?id=1V2xcLqkyJKqfAzUO7C5bUceyQtq0BjNe -O data/fake_data.zip
-sudo apt install unzip
-unzip data/fake_data.zip
+# create metadata jsons for the mini dataset
+exec ./generate_metadata_jsons data/mini &
 
-# make the json files for metadata
-cd src/tools
-python make_imagenet_json.py --root ../../data/fake_data --save ../../data
+# download fake data?
+read -p "Download fake_data.zip (y/n)?: " input
+if [[ $input == "y" ]]; then
+  exec ./download_fake_data.sh
+fi
 exit 0
