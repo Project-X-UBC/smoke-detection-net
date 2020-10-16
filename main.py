@@ -47,7 +47,7 @@ def set_params():
     """
     params = {
         # paths
-        'data_dir': './data/synthetic',
+        'data_dir': './data/mini',
         'output_dir': './output',  # default is ./output/$date_$time if left as empty string
 
         # hyperparameters
