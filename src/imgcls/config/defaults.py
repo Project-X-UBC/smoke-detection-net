@@ -7,10 +7,8 @@
 @Description    :
 """
 
-
 from detectron2.config.defaults import _C
 from detectron2.config import CfgNode as CN
-
 
 # ---------------------------------------------------------------------------- #
 # MobileNets
@@ -22,14 +20,13 @@ _C.MODEL.MNET.OUT_FEATURES = ['linear']
 # Width mult
 _C.MODEL.MNET.WIDTH_MULT = 1.0
 
-
 # ---------------------------------------------------------------------------- #
 # ClsNets
 # ---------------------------------------------------------------------------- #
 _C.MODEL.CLSNET = CN()
 _C.MODEL.CLSNET.ENABLE = False
 # classes number
-_C.MODEL.CLSNET.NUM_CLASSES = 1000
+_C.MODEL.CLSNET.NUM_CLASSES = 16
 # In features
 _C.MODEL.CLSNET.IN_FEATURES = ['linear']
 # Input Size
@@ -38,3 +35,5 @@ _C.MODEL.CLSNET.INPUT_SIZE = 224
 # data directory
 _C.DATA_DIR_PATH = './data'
 
+# weights for criterion
+_C.MODEL.POS_WEIGHT = [1 for i in range(16)]
