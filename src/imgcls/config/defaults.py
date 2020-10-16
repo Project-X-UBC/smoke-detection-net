@@ -34,3 +34,7 @@ _C.MODEL.CLSNET.NUM_CLASSES = 1000
 _C.MODEL.CLSNET.IN_FEATURES = ['linear']
 # Input Size
 _C.MODEL.CLSNET.INPUT_SIZE = 224
+
+# data directory
+_C.DATA_DIR_PATH = './data'
+

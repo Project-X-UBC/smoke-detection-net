@@ -22,16 +22,11 @@ ARCHIVE_META = {
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Make imagenet dataset d2-style")
-    parser.add_argument('--root', type=str, help="ImageNet root directory")
-    parser.add_argument('--save', type=str, help="Result saving directory")
-
+    parser.add_argument('--path', type=str, help="Path of the directory containing the image data")
     args = parser.parse_args()
-    if not os.path.exists(args.save):
-        os.makedirs(args.save)
 
-    print(os.path.join(args.root, ARCHIVE_META['train']))
-    assert os.path.exists(os.path.join(args.root, ARCHIVE_META['train']))
-    assert os.path.exists(os.path.join(args.root, ARCHIVE_META['val']))
+    assert os.path.exists(os.path.join(args.path, ARCHIVE_META['train']))
+    assert os.path.exists(os.path.join(args.path, ARCHIVE_META['val']))
 
     return args
 
@@ -72,14 +67,14 @@ def main(args):
     # TODO: use GroupKFold https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html
     # to split the train/test/val datasets
     # Accumulate train
-    dataset_dicts_train = accumulate_imagenet_json(args.root, phase='train')
+    dataset_dicts_train = accumulate_imagenet_json(args.path, phase='train')
     # Accumulate val
-    dataset_dicts_val = accumulate_imagenet_json(args.root, phase='test')
+    dataset_dicts_val = accumulate_imagenet_json(args.path, phase='test')
     # Save
     # TODO: add arg for train, val, test json file names
-    with open(os.path.join(args.save, "train.json"), "w") as w_obj:
+    with open(os.path.join(args.path, "train.json"), "w") as w_obj:
         json.dump(dataset_dicts_train, w_obj)
-    with open(os.path.join(args.save, "val.json"), "w") as w_obj:
+    with open(os.path.join(args.path, "val.json"), "w") as w_obj:
         json.dump(dataset_dicts_val, w_obj)
 
 

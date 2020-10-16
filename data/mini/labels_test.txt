@@ -1,0 +1,5 @@
+{"frame_000000.png": {"size": 4, "index": 0},
+"frame_000000_b.png": {"size": 4, "index": 4},
+"frame_000000_d.png": {"size": 4, "index": 6},
+"frame_000000_hc.png": {"size": 4, "index": 8},
+"frame_000000_lc.png": {"size": 4, "index": 11}}

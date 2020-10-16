@@ -24,17 +24,17 @@ def update_config(params, config_path='src/config.yaml'):
     with open(config_path, 'r') as yml_file:
         cfg = yaml.full_load(yml_file)
 
-    with open(params['train_json_file'], 'r') as json_file:
+    with open(os.path.join(params['data_dir'], 'train.json'), 'r') as json_file:
         train_json = json.load(json_file)
         num_imgs = len(train_json)
 
-    print(cfg)
     cfg['SOLVER']['BASE_LR'] = params['base_lr']
     cfg['SOLVER']['IMS_PER_BATCH'] = params['batch_size']
     cfg['SOLVER']['MAX_ITER'] = compute_max_iter(num_imgs, params['batch_size'], params['num_epochs'])
     cfg['MODEL']['CLSNET']['INPUT_SIZE'] = params['input_size']
     cfg['MODEL']['MNET']['WIDTH_MULT'] = params['base_multiplier']
     cfg['OUTPUT_DIR'] = os.path.abspath(create_output_dir(params['output_dir']))
+    cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
 
     # update config.yml file
     with open(config_path, 'w') as yml_file:
@@ -47,10 +47,8 @@ def set_params():
     """
     params = {
         # paths
-        'data_dir': './data',
+        'data_dir': './data/mini',
         'output_dir': './output',  # default is ./output/$date_$time if left as empty string
-        'train_json_file': './data/train.json',
-        'val_json_file': './data/val.json',
 
         # hyperparameters
         'base_lr': 0.1,
