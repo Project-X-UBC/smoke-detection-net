@@ -108,7 +108,6 @@ class MobileNetV1(Backbone):
             self.linear = nn.Linear(input_channel, num_classes)
             nn.init.normal_(self.linear.weight, std=0.01)
             name = "linear"
-            self.sigmoid = nn.Sigmoid()
 
         if out_features is None:
             out_features = [name]
@@ -163,7 +162,6 @@ class MobileNetV1(Backbone):
             x = self.avgpool(x)
             x = torch.flatten(x, 1)
             x = self.linear(x)
-            x = self.sigmoid(x)  # applies element wise sigmoid which outputs values in range [0,1]
             if "linear" in self._out_features:  # TODO: should probs change linear
                 outputs["linear"] = x
         return outputs
