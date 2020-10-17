@@ -12,6 +12,7 @@ from detectron2.modeling.backbone import build_backbone
 from detectron2.modeling.meta_arch.build import META_ARCH_REGISTRY
 from detectron2.structures import ImageList
 from torch import nn
+import logging
 
 
 @META_ARCH_REGISTRY.register()
@@ -23,8 +24,11 @@ class ClsNet(nn.Module):
         self.num_classes = cfg.MODEL.CLSNET.NUM_CLASSES
         self.in_features = cfg.MODEL.CLSNET.IN_FEATURES
         self.bottom_up = build_backbone(cfg)
-        self.criterion = nn.BCEWithLogitsLoss(pos_weight=torch.as_tensor(cfg.MODEL.POS_WEIGHT, dtype=torch.float))
-        # TODO: look into nn.MultiLabelMarginLoss
+
+        self._logger = logging.getLogger("detectron2.loss")
+        pos_weight = torch.as_tensor(cfg.MODEL.POS_WEIGHT, dtype=torch.float)
+        self._logger.info('pos_weight: ' + str(pos_weight))
+        self.criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
         self.register_buffer("pixel_mean", torch.Tensor(cfg.MODEL.PIXEL_MEAN).view(-1, 1, 1))
         self.register_buffer("pixel_std", torch.Tensor(cfg.MODEL.PIXEL_STD).view(-1, 1, 1))
@@ -60,5 +64,7 @@ class ClsNet(nn.Module):
             return processed_results
 
     def losses(self, gt_labels, features):
-        return {"loss_cls": self.criterion(features[0], gt_labels)}
+        loss = self.criterion(features[0], gt_labels)
+        self._logger.info('loss: %.4f' % loss)
+        return {"loss_cls": loss}
 
