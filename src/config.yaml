@@ -27,4 +27,7 @@ SOLVER:
 INPUT:
   CROP:
     ENABLED: False
+TEST:
+  EVAL_PERIOD: 0 # the period to evaluate the model during training, 0 means disable
+
 VERSION: 2

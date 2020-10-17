@@ -52,6 +52,9 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
     cfg['MODEL']['POS_WEIGHT'] = [int(i) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
 
+    if params['num_validation_steps'] != 0:
+        cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER']/params['num_validation_steps'])
+
     # update config.yml file
     with open(config_path, 'w') as yml_file:
         yaml.dump(cfg, yml_file)
@@ -63,7 +66,7 @@ def set_params():
     """
     params = {
         # paths
-        'data_dir': './data/mini',
+        'data_dir': './data/synthetic',
         'output_dir': './output',  # default is ./output/$date_$time if left as empty string
 
         # hyperparameters
@@ -71,7 +74,8 @@ def set_params():
         'batch_size': 64,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
-        'num_epochs': 1  # total number of epochs, can be < 1
+        'num_epochs': 1,  # total number of epochs, can be < 1
+        'num_validation_steps': 1  # number of evaluations on the validation set during training
     }
 
     update_config(params)
