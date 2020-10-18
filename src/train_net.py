@@ -12,7 +12,7 @@ import os
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.data import MetadataCatalog, build_detection_train_loader, build_detection_test_loader
-from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
+from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, launch
 from detectron2.evaluation import (
     DatasetEvaluators,
     verify_results,
@@ -23,6 +23,7 @@ import src.imgcls.modeling  # need this import to initialize modeling package
 from src.imgcls.data import DatasetMapper
 from src.imgcls.data.imagenet import register_imagenet_instances
 from src.imgcls.evaluation.imagenet_evaluation import ImageNetEvaluator
+from src.imgcls.evaluation.loss_eval_hook import LossEvalHook
 
 
 class Trainer(DefaultTrainer):
@@ -34,7 +35,6 @@ class Trainer(DefaultTrainer):
     "tools/plain_train_net.py" as an example.
     https://detectron2.readthedocs.io/_modules/detectron2/engine/defaults.html#DefaultTrainer
     """
-
     @classmethod
     def build_test_loader(cls, cfg, dataset_name):
         return build_detection_test_loader(cfg, dataset_name, mapper=DatasetMapper(cfg, False))
@@ -51,6 +51,12 @@ class Trainer(DefaultTrainer):
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
         return ImageNetEvaluator(dataset_name, True, output_folder)
+
+    def build_hooks(self):
+        hooks = super().build_hooks()
+        hooks.insert(-1, LossEvalHook(self.cfg.TEST.EVAL_PERIOD, self.model,
+                                      self.build_test_loader(self.cfg, 'smokenet_val')))
+        return hooks
 
 
 def setup(args):

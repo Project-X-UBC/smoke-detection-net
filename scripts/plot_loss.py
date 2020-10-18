@@ -13,14 +13,14 @@ def plot_loss(output_dir):
                 data.append(obj)
 
     df = pd.json_normalize(data)
-    plt.plot(df['iteration'], df['total_loss'], label='train')
+    plt.plot(df['iteration'], df['total_loss'], label='total loss')
+    plt.plot(df['iteration'], df['validation_loss'], label='validation loss')
     plt.xlabel('iteration #, 1 epoch = %i iterations' %
                compute_params(os.path.join(output_dir, 'config.yaml'))['one_epoch'])
-    plt.ylabel('loss')
     plt.legend()
     total_hours = (df['eta_seconds'].max() - df['eta_seconds'].min())/60/60
     plt.title("Model loss, total training time %.2f hours" % total_hours)
-    plt.savefig(os.path.join(output_dir, 'train_loss.png'))
+    plt.savefig(os.path.join(output_dir, 'model_loss.png'))
 
 
 if __name__ == '__main__':
