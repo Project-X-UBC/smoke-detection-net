@@ -51,9 +51,13 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['OUTPUT_DIR'] = os.path.abspath(create_output_dir(params['output_dir']))
     cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
     cfg['MODEL']['POS_WEIGHT'] = [int(i) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
+    cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
 
     if params['num_validation_steps'] != 0:
         cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER']/params['num_validation_steps'])
+
+    if params['load_pretrained_weights']:
+        cfg['MODEL']['WEIGHTS'] = os.path.abspath(params['model_weights'])
 
     # update config.yml file
     with open(config_path, 'w') as yml_file:
@@ -70,12 +74,17 @@ def set_params():
         'output_dir': './output',  # default is ./output/$date_$time if left as empty string
 
         # hyperparameters
-        'base_lr': 0.1,
+        'base_lr': 0.01,
         'batch_size': 64,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
         'num_epochs': 1,  # total number of epochs, can be < 1
-        'num_validation_steps': 1  # number of evaluations on the validation set during training
+        'num_validation_steps': 1,  # number of evaluations on the validation set during training
+
+        # misc
+        'num_workers': 8,  # number of data loading threads
+        'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
+        'model_weights': './output/model.pth'  # path to model weights file
     }
 
     update_config(params)
@@ -84,3 +93,4 @@ def set_params():
 if __name__ == '__main__':
     set_params()
     train_net.main()
+
