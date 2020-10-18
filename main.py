@@ -5,6 +5,7 @@ from datetime import datetime
 from src import train_net
 import numpy as np
 import pandas as pd
+from scripts.plot_loss import plot_loss
 
 
 def calculate_pos_weights(data):
@@ -89,8 +90,10 @@ def set_params():
 
     update_config(params)
 
+    return params
+
 
 if __name__ == '__main__':
-    set_params()
+    p = set_params()
     train_net.main()
-
+    plot_loss(p['output_dir'])
