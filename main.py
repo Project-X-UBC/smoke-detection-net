@@ -59,6 +59,8 @@ def update_config(params, config_path='src/config.yaml'):
 
     if params['load_pretrained_weights']:
         cfg['MODEL']['WEIGHTS'] = os.path.abspath(params['model_weights'])
+    else:
+        cfg['MODEL']['WEIGHTS'] = ''
 
     # update config.yml file
     with open(config_path, 'w') as yml_file:
@@ -79,8 +81,8 @@ def set_params():
         'batch_size': 64,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
-        'num_epochs': 1,  # total number of epochs, can be < 1
-        'num_validation_steps': 1,  # number of evaluations on the validation set during training
+        'num_epochs': 100,  # total number of epochs, can be < 1
+        'num_validation_steps': 10,  # number of evaluations on the validation set during training
 
         # misc
         'num_workers': 8,  # number of data loading threads

@@ -9,7 +9,7 @@ def plot_loss(output_dir):
     data = []
     with jsonlines.open(os.path.join(output_dir, 'metrics.json')) as reader:
         for obj in reader:
-            if 'metrics/accuracy' not in obj.keys():
+            if 'total_loss' in obj.keys():
                 data.append(obj)
 
     df = pd.json_normalize(data)
@@ -24,5 +24,5 @@ def plot_loss(output_dir):
 
 
 if __name__ == '__main__':
-    output = "../output/output_dir"
+    output = "output/test"
     plot_loss(output)
