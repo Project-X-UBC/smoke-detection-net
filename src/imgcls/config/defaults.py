@@ -37,3 +37,6 @@ _C.DATA_DIR_PATH = './data'
 
 # weights for criterion
 _C.MODEL.POS_WEIGHT = [1 for i in range(16)]
+
+# eval only mode
+_C.EVAL_ONLY = False

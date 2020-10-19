@@ -66,16 +66,22 @@ def setup(args):
     cfg = get_cfg()
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
+
+    if cfg.EVAL_ONLY:
+        cfg.DATASETS.TEST = ("smokenet_test", )
+        test_annotation_file = os.path.join(cfg.DATA_DIR_PATH, "test.json")
+        # Register into DatasetCatalog
+        register_imagenet_instances(cfg.DATASETS.TEST[0], {}, test_annotation_file)
+
+    else:
+        train_annotation_file = os.path.join(cfg.DATA_DIR_PATH, "train.json")
+        val_annotation_file = os.path.join(cfg.DATA_DIR_PATH, "val.json")
+        # Register into DatasetCatalog
+        register_imagenet_instances("smokenet_train", {}, train_annotation_file)
+        register_imagenet_instances("smokenet_val", {}, val_annotation_file)
+
     cfg.freeze()
     default_setup(cfg, args)
-
-    # TODO: register third dataset for test.json
-    train_annotation_file = os.path.join(cfg.DATA_DIR_PATH, "train.json")
-    val_annotation_file = os.path.join(cfg.DATA_DIR_PATH, "val.json")
-
-    # Register into DatasetCatalog
-    register_imagenet_instances("smokenet_train", {}, train_annotation_file)
-    register_imagenet_instances("smokenet_val", {}, val_annotation_file)
 
     return cfg
 
@@ -83,9 +89,9 @@ def setup(args):
 def run(args):
     cfg = setup(args)
 
-    if args.eval_only:
+    if cfg.EVAL_ONLY:
         model = Trainer.build_model(cfg)
-        DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(cfg.MODEL.WEIGHTS, resume=args.resume)
+        DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(cfg.MODEL.WEIGHTS, resume=False)
         res = Trainer.test(cfg, model)
         if comm.is_main_process():
             verify_results(cfg, res)  # TEST.EXPECTED_RESULTS is an empty list
