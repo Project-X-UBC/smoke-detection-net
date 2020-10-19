@@ -18,9 +18,10 @@ DATA_FOLDER = '../data/full'
 
 def get_sample_filename():
     filenames = listdir(DATA_FOLDER)
-    filenames.remove('.gitignore')
-    filename = random.choice(filenames)
-    return filename
+    while True:
+        filename = random.choice(filenames)
+        if 'png' in filename:
+            return filename
 
 
 def get_label_and_boxes(filename):
@@ -72,8 +73,7 @@ def get_pred_and_true(filename):
     return pred, true
 
 
-def draw_pred_vs_true(filename, pred, true):
-    img = cv2.imread(DATA_FOLDER + '/' + filename)
+def draw_pred_vs_true(img, pred, true):
     exclusive = np.vectorize(lambda x, y: 1 if x == 1 and y == 0 else 0)
     pred_only, true_only = exclusive(pred, true), exclusive(true, pred)
     both = pred & true
@@ -94,7 +94,7 @@ if __name__ == '__main__':
         filename = get_sample_filename()
     if sys.argv[1] == 'evaluate':
         pred, true, = get_pred_and_true(filename)
-        img = draw_pred_vs_true(filename, pred, true)
+        img = draw_pred_vs_true(cv2.imread(DATA_FOLDER + '/' + filename), pred, true)
     elif sys.argv[1] == 'gridbox':
         label, boxes = get_label_and_boxes(filename)
         img = draw_grid_and_box(filename, label, boxes)
