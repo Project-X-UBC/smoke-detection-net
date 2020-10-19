@@ -48,16 +48,16 @@ class ClsNet(nn.Module):
 
     def forward(self, batched_inputs):
         images = self.preprocess_image(batched_inputs)
-        gt_labels = [x['label'] for x in batched_inputs]
-        gt_labels = torch.as_tensor(gt_labels, dtype=torch.float).to(self.device)
         features = self.bottom_up(images.tensor)
         features = [features[f] for f in self.in_features]
 
         if self.training:
+            gt_labels = [x['label'] for x in batched_inputs]
+            gt_labels = torch.as_tensor(gt_labels, dtype=torch.float).to(self.device)
             losses = self.losses(gt_labels, features)
             return losses
         else:
-            results = features[0]
+            results = nn.Sigmoid()(features[0])
             processed_results = []
             for results_per_image in results:
                 processed_results.append({"pred": results_per_image})
