@@ -5,7 +5,18 @@ from datetime import datetime
 from src import train_net
 import numpy as np
 import pandas as pd
+import torch
+import random
 from scripts.plot_loss import plot_loss
+
+
+def seed_all(seed):
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
 
 
 def calculate_pos_weights(data):
@@ -55,7 +66,7 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
 
     if params['num_validation_steps'] != 0:
-        cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER']/params['num_validation_steps'])
+        cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER'] / params['num_validation_steps'])
 
     if params['load_pretrained_weights']:
         cfg['MODEL']['WEIGHTS'] = os.path.abspath(params['model_weights'])
@@ -83,12 +94,14 @@ def set_params():
         'num_validation_steps': 1,  # number of evaluations on the validation set during training
 
         # misc
-        'num_workers': 8,  # number of data loading threads
+        'num_workers': 4,  # number of data loading threads
         'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
-        'model_weights': './output/model.pth'  # path to model weights file
+        'model_weights': './output/model.pth',  # path to model weights file
+        'seed': 999  # seed so computations are deterministic
     }
 
     update_config(params)
+    seed_all(params['seed'])
 
     return params
 
