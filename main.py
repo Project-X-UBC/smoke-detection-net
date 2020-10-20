@@ -5,7 +5,18 @@ from datetime import datetime
 from src import train_net
 import numpy as np
 import pandas as pd
+import torch
+import random
 from scripts.plot_loss import plot_loss
+
+
+def seed_all(seed):
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
 
 
 def calculate_pos_weights(data):
@@ -56,7 +67,7 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['EVAL_ONLY'] = params['eval_only_mode']
 
     if params['num_validation_steps'] != 0:
-        cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER']/params['num_validation_steps'])
+        cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER'] / params['num_validation_steps'])
 
     if params['load_pretrained_weights'] or params['eval_only_mode']:
         cfg['MODEL']['WEIGHTS'] = os.path.abspath(params['model_weights'])
@@ -92,10 +103,12 @@ def set_params():
 
         # misc
         'checkpoint_period': 5000,  # save a checkpoint after every this number of iterations
-        'num_workers': 8  # number of data loading threads
+        'num_workers': 4,  # number of data loading threads
+        'seed': 999  # seed so computations are deterministic
     }
 
     update_config(params)
+    seed_all(params['seed'])
 
     return params
 
