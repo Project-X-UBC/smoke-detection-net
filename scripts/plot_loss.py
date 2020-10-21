@@ -18,7 +18,7 @@ def plot_loss(output_dir):
 
     df = pd.json_normalize(data)
     plt.plot(df['iteration'], df['total_loss'], label='total loss')
-    plt.plot(df['iterlsation'], df['validation_loss'], label='validation loss')
+    #plt.plot(df['iteration'], df['validation_loss'], label='validation loss')
     plt.xlabel('iteration #, 1 epoch = %i iterations' %
                compute_params(os.path.join(output_dir, 'config.yaml'))['one_epoch'])
     plt.legend()

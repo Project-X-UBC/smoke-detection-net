@@ -42,7 +42,7 @@ class ImageNetEvaluator(DatasetEvaluator):
     def process(self, inputs, outputs):
         for input, output in zip(inputs, outputs):
             prediction = {"file_path": input["file_name"], "image_id": input["image_id"], "label": input["label"],
-                          "pred": nn.Sigmoid()(output["pred"].to(self._cpu_device))}
+                          "pred": output["pred"].to(self._cpu_device)}
             self._predictions.append(prediction)
 
     def evaluate(self):
