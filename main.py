@@ -64,12 +64,15 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
     cfg['MODEL']['POS_WEIGHT'] = [int(i) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
     cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
+    cfg['EVAL_ONLY'] = params['eval_only_mode']
 
     if params['num_validation_steps'] != 0:
         cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER'] / params['num_validation_steps'])
 
-    if params['load_pretrained_weights']:
+    if params['load_pretrained_weights'] or params['eval_only_mode']:
         cfg['MODEL']['WEIGHTS'] = os.path.abspath(params['model_weights'])
+    else:
+        cfg['MODEL']['WEIGHTS'] = ''
 
     # update config.yml file
     with open(config_path, 'w') as yml_file:
@@ -81,9 +84,14 @@ def set_params():
     Sets the parameters of the pipeline
     """
     params = {
+        # pipeline modes
+        'eval_only_mode': False,  # evaluate model on test data, if true 'model_weights' param needs to be set
+        'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
+
         # paths
         'data_dir': './data/synthetic',
         'output_dir': './output',  # default is ./output/$date_$time if left as empty string
+        'model_weights': './output/model_final.pth',  # path to model weights file for training with pretrained weights
 
         # hyperparameters
         'base_lr': 0.01,
@@ -94,9 +102,8 @@ def set_params():
         'num_validation_steps': 1,  # number of evaluations on the validation set during training
 
         # misc
+        'checkpoint_period': 5000,  # save a checkpoint after every this number of iterations
         'num_workers': 4,  # number of data loading threads
-        'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
-        'model_weights': './output/model.pth',  # path to model weights file
         'seed': 999  # seed so computations are deterministic
     }
 
@@ -109,4 +116,5 @@ def set_params():
 if __name__ == '__main__':
     p = set_params()
     train_net.main()
-    plot_loss(p['output_dir'])
+    if not p['eval_only_mode']:
+        plot_loss(p['output_dir'])

@@ -65,6 +65,6 @@ class ClsNet(nn.Module):
 
     def losses(self, gt_labels, features):
         loss = self.criterion(features[0], gt_labels)
-        self._logger.info('loss: %.4f' % loss)
+        #self._logger.info('loss: %.4f' % loss)
         return {"loss_cls": loss}
 
