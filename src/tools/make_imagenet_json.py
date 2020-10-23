@@ -63,14 +63,39 @@ def accumulate_imagenet_json(image_root, phase):
     return dataset_dicts
 
 
+def accumulate_real_data_json(image_root, phase):
+    json_filename = os.path.join(image_root, 'labels_' + phase + '.json')
+    with open(json_filename, 'rb') as f:
+        labels = json.load(f)['labels']
+    filenames = set(os.listdir(f'../../data/full/{phase}'))
+    dataset_dicts = []
+    for idx, filename in enumerate(tqdm(labels.keys())):
+        # FIXME: fake data has images_test\\ or images_train\\ appended in front of keys
+        # the json has every frame of every video, and we only want some of them
+        if filename not in filenames:
+            continue
+        record = {
+            'file_name': filename,
+            'image_id' : idx,
+            'label'    : labels[filename]
+        }
+        dataset_dicts.append(record)
+
+    return dataset_dicts
+
+
 def main(args):
     # TODO: use GroupKFold https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html
     # to split the train/test/val datasets
     # Accumulate train
-    dataset_dicts_train = accumulate_imagenet_json(args.path, phase='train')
-    # Accumulate val
-    dataset_dicts_val = accumulate_imagenet_json(args.path, phase='test')
-    # Save
+    if args.path == os.path.abspath('../../data/full'):
+        dataset_dicts_train = accumulate_real_data_json(args.path, phase='train')
+        dataset_dicts_val = accumulate_real_data_json(args.path, phase='test')
+    else:   
+        dataset_dicts_train = accumulate_imagenet_json(args.path, phase='train')
+        # Accumulate val
+        dataset_dicts_val = accumulate_imagenet_json(args.path, phase='test')
+        # Save
     # TODO: add arg for train, val, test json file names
     with open(os.path.join(args.path, "train.json"), "w") as w_obj:
         json.dump(dataset_dicts_train, w_obj)
