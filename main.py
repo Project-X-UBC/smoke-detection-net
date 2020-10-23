@@ -65,6 +65,7 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['MODEL']['POS_WEIGHT'] = [int(i) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
     cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
     cfg['EVAL_ONLY'] = params['eval_only_mode']
+    cfg['SEED'] = params['seed']
 
     if params['num_validation_steps'] != 0:
         cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER'] / params['num_validation_steps'])
@@ -84,6 +85,9 @@ def set_params():
     Sets the parameters of the pipeline
     """
     params = {
+        # compute settings
+        'num_gpus': 1,  # number of gpus, can check with `nvidia-smi`
+
         # pipeline modes
         'eval_only_mode': False,  # evaluate model on test data, if true 'model_weights' param needs to be set
         'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
@@ -115,6 +119,6 @@ def set_params():
 
 if __name__ == '__main__':
     p = set_params()
-    train_net.main()
+    train_net.main(p['num_gpus'])
     if not p['eval_only_mode']:
         plot_loss(p['output_dir'])
