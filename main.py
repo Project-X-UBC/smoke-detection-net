@@ -16,7 +16,7 @@ def seed_all(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.deterministic = True  # may result in a slowdown
 
 
 def calculate_pos_weights(data):
@@ -94,6 +94,7 @@ def set_params():
 
         # pipeline modes
         'eval_only_mode': False,  # evaluate model on test data, if true 'model_weights' param needs to be set
+        'resume': False,  # resume training from last checkpoint in 'output_dir', useful when training was interrupted
         'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
         'early_stopping': True,  # option to early stop model training if a certain condition is met
         'early_stopping_monitor': 'accuracy',  # metric to monitor for early stopping e.g. validation_loss, accuracy...
@@ -127,6 +128,6 @@ def set_params():
 
 if __name__ == '__main__':
     p = set_params()
-    custom_train_loop.main(p['num_gpus'])
+    custom_train_loop.main(num_gpus=p['num_gpus'], resume=p['resume'])
     if not p['eval_only_mode']:
         plot_loss(p['output_dir'])

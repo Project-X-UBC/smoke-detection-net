@@ -252,9 +252,10 @@ def run(args):
     return do_test(cfg, model)
 
 
-def main(num_gpus=1):
+def main(num_gpus=1, resume=False):
     args = default_argument_parser().parse_args()
     args.config_file = "src/config.yaml"
+    args.resume = resume
     print("Command Line Args: ", args)
     # launch multi-gpu or distributed training
     launch(
