@@ -1,12 +1,4 @@
-"""
-@Copyright (c) tkianai All Rights Reserved.
-@Author         : tkianai
-@Github         : https://github.com/tkianai
-@Date           : 2020-04-26 14:02:06
-@FilePath       : /ImageCls.detectron2/train_net_builtin.py
-@Description    :
-"""
-
+# original file from https://github.com/facebookresearch/detectron2/blob/master/tools/plain_train_net.py
 import os
 
 import detectron2.utils.comm as comm
@@ -27,14 +19,6 @@ from src.imgcls.evaluation.loss_eval_hook import LossEvalHook
 
 
 class Trainer(DefaultTrainer):
-    """
-    We use the "DefaultTrainer" which contains pre-defined default logic for
-    standard training workflow. They may not work for you, especially if you
-    are working on a new research project. In that case you can use the cleaner
-    "SimpleTrainer", or write your own training loop. You can use
-    "tools/plain_train_net.py" as an example.
-    https://detectron2.readthedocs.io/_modules/detectron2/engine/defaults.html#DefaultTrainer
-    """
     @classmethod
     def build_test_loader(cls, cfg, dataset_name):
         return build_detection_test_loader(cfg, dataset_name, mapper=DatasetMapper(cfg, False))
@@ -97,10 +81,6 @@ def run(args):
             verify_results(cfg, res)  # TEST.EXPECTED_RESULTS is an empty list
         return res
 
-    """
-    If you'd like to do anything fancier than the standard training logic,
-    consider writing your own training loop or subclassing the trainer.
-    """
     trainer = Trainer(cfg)
     trainer.resume_or_load(resume=args.resume)
 
