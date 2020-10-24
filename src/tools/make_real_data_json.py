@@ -47,9 +47,12 @@ def train_test_val_split(filenames):
     videonames = np.array([filename.split('_frame')[0] for filename in filenames])
     gs_split_test = GroupShuffleSplit(n_splits=1, test_size=TEST_SIZE, random_state=RANDOM_SEED)
     gs_split_val = GroupShuffleSplit(n_splits=1, test_size=VALIDATION_SIZE, random_state=RANDOM_SEED)
-    train_idx, test_idx = gs_split_test.split(filenames, groups=videonames)
-    train_idx, val_idx = gs_split_val.split(filenames[train_idx], groups=videonames)
-    return {'train': train_idx, 'test': test_idx, 'val': val_idx}
+    train_idx, test_idx = next(gs_split_test.split(filenames, groups=videonames))
+    train, test = filenames[train_idx], filenames[test_idx]
+    train_idx, val_idx = next(gs_split_val.split(train, groups=videonames[train_idx]))
+    train, val = train[train_idx], train[val_idx]
+    assert not np.in1d(train, test).any() and not np.in1d(train, val).any()
+    return {'train': train, 'test': test, 'val': val}
 
 
 def unify_files():
@@ -63,6 +66,7 @@ def unify_files():
 
 def split_files(dataset_dicts):
     # Split the files into train, test, and val again
+    print('Now splitting the files into different folders...')
     if not os.path.isdir(f'{DATA_FOLDER}/train'):
         for phase in ('train', 'test', 'val'):
             os.mkdir(f'{DATA_FOLDER}/{phase}')
@@ -70,22 +74,24 @@ def split_files(dataset_dicts):
         for record in dataset_dicts[phase]:
             filename = record['file_name']
             os.rename(f'{DATA_FOLDER}/frames/{filename}', f'{DATA_FOLDER}/{phase}/{filename}')
-    os.rmdir(f'{DATA_FOLDER}/frames')
 
 
 def accumulate_real_data_json(image_root):
+    print('Accumulating the JSON...')
     json_filename = os.path.join(image_root, 'labels.json')
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
     filenames = np.array(os.listdir(f'{image_root}/frames'))
-    idxs = train_test_val_split(filenames)
+    phases = train_test_val_split(filenames)
     dataset_dicts = {'train': [], 'test': [], 'val': []}
-    for phase in idxs:
-        for idx in tqdm(idxs[phase]):
+    for phase in phases:
+        for filename in tqdm(phases[phase]):
+            if filename not in labels:
+                continue
             record = {
-                'file_name': filenames[idx],
-                'image_id' : idx,
-                'label'    : labels[filenames[idx]]
+                'file_name': str(filename),
+                'image_id' : int(np.where(filenames == filename)[0]),
+                'label'    : labels[filename]
             }
             dataset_dicts[phase].append(record)
     return dataset_dicts
@@ -100,6 +106,7 @@ def make_real_data_main():
     # Accumulate val
     # Save
     # TODO: add arg for train, val, test json file names
+    print('Saving the JSON files...')
     with open(os.path.join(DATA_FOLDER, "train.json"), "w") as w_obj:
         json.dump(dataset_dicts['train'], w_obj)
     with open(os.path.join(DATA_FOLDER, "test.json"), "w") as w_obj:
