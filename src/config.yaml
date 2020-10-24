@@ -30,4 +30,10 @@ INPUT:
 TEST:
   EVAL_PERIOD: 0 # the period to evaluate the model during training, 0 means disable
 
+EARLY_STOPPING:
+  ENABLE: True
+  MONITOR: "validation_loss"
+  PATIENCE: 10
+  MODE: "min"
+
 VERSION: 2

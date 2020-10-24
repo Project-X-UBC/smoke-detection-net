@@ -2,7 +2,7 @@ import os
 import yaml
 import json
 from datetime import datetime
-from src import train_net
+from src import custom_train_loop
 import numpy as np
 import pandas as pd
 import torch
@@ -65,6 +65,11 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['MODEL']['POS_WEIGHT'] = [int(i) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
     cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
     cfg['EVAL_ONLY'] = params['eval_only_mode']
+    cfg['SEED'] = params['seed']
+    cfg['EARLY_STOPPING']['ENABLE'] = params['early_stopping']
+    cfg['EARLY_STOPPING']['MONITOR'] = params['early_stopping_monitor']
+    cfg['EARLY_STOPPING']['PATIENCE'] = params['patience']
+    cfg['EARLY_STOPPING']['MODE'] = params['early_stopping_mode']
 
     if params['num_validation_steps'] != 0:
         cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER'] / params['num_validation_steps'])
@@ -84,9 +89,15 @@ def set_params():
     Sets the parameters of the pipeline
     """
     params = {
+        # compute settings
+        'num_gpus': 1,  # number of gpus, can check with `nvidia-smi`
+
         # pipeline modes
         'eval_only_mode': False,  # evaluate model on test data, if true 'model_weights' param needs to be set
         'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
+        'early_stopping': True,  # option to early stop model training if a certain condition is met
+        'early_stopping_monitor': 'accuracy',  # metric to monitor for early stopping e.g. validation_loss, accuracy...
+        'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
         'data_dir': './data/synthetic',
@@ -94,12 +105,13 @@ def set_params():
         'model_weights': './output/model_final.pth',  # path to model weights file for training with pretrained weights
 
         # hyperparameters
+        'patience': 10,  # number of val steps where no improvement is made before triggering early stopping
         'base_lr': 0.01,
         'batch_size': 64,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
-        'num_epochs': 1,  # total number of epochs, can be < 1
-        'num_validation_steps': 1,  # number of evaluations on the validation set during training
+        'num_epochs': 100,  # total number of epochs, can be < 1
+        'num_validation_steps': 50,  # number of evaluations on the validation set during training
 
         # misc
         'checkpoint_period': 5000,  # save a checkpoint after every this number of iterations
@@ -115,6 +127,6 @@ def set_params():
 
 if __name__ == '__main__':
     p = set_params()
-    train_net.main()
+    custom_train_loop.main(p['num_gpus'])
     if not p['eval_only_mode']:
         plot_loss(p['output_dir'])

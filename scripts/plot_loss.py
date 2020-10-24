@@ -14,7 +14,6 @@ def plot_loss(output_dir):
                 data.append(obj)
 
     log = open(os.path.join(output_dir, "log.txt"), 'r')
-    training_time = re.search('time:(.+?) \(', log.readlines()[-1]).group(1)
 
     df = pd.json_normalize(data)
     plt.plot(df['iteration'], df['total_loss'], label='total loss')
@@ -22,7 +21,7 @@ def plot_loss(output_dir):
     plt.xlabel('iteration #, 1 epoch = %i iterations' %
                compute_params(os.path.join(output_dir, 'config.yaml'))['one_epoch'])
     plt.legend()
-    plt.title("Model loss, total training time%s hours" % training_time)
+    plt.title("Model loss")
     plt.savefig(os.path.join(output_dir, 'model_loss.png'))
 
 

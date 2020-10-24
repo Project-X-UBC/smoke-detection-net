@@ -107,16 +107,14 @@ def run(args):
     return trainer.train()
 
 
-def main():
-    # FIXME hardcoded args
+def main(num_gpus=1):
     args = default_argument_parser().parse_args()
     args.config_file = "src/config.yaml"
-    args.num_gpus = 1
     print("Command Line Args: ", args)
     # launch multi-gpu or distributed training
     launch(
         run,
-        args.num_gpus,
+        num_gpus,
         num_machines=args.num_machines,
         machine_rank=args.machine_rank,
         dist_url="auto",
