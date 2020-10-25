@@ -131,6 +131,9 @@ def do_train(cfg, model, resume=False):
     # init early stopping count
     es_count = 0
 
+    # init val loss
+    val_loss = compute_val_loss(cfg, model)
+
     # compared to "train_net.py", we do not support accurate timing and
     # precise BN here, because they are not trivial to implement in a small training loop
     data_loader = build_train_loader(cfg)
@@ -141,7 +144,7 @@ def do_train(cfg, model, resume=False):
 
             _, losses, losses_reduced = get_loss(data, model)
             if comm.is_main_process():
-                storage.put_scalars(total_loss=losses_reduced)
+                storage.put_scalars(total_loss=losses_reduced, validation_loss=val_loss)
 
             optimizer.zero_grad()
             losses.backward()
@@ -183,8 +186,6 @@ def do_train(cfg, model, resume=False):
                         logger.info("Early stopping metric %s did not improve, current %.04f, best %.04f" %
                                     (cfg.EARLY_STOPPING.MONITOR, curr, best_monitor_metric))
                         es_count += 1
-
-                storage.put_scalar('validation_loss', val_loss)
 
                 # Compared to "train_net.py", the test results are not dumped to EventStorage
                 comm.synchronize()

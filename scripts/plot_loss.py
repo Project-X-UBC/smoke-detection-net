@@ -10,14 +10,14 @@ def plot_loss(output_dir):
     data = []
     with jsonlines.open(os.path.join(output_dir, 'metrics.json')) as reader:
         for obj in reader:
-            if 'total_loss' in obj.keys():
+            if 'total_loss' in obj.keys() and 'validation_loss' in obj.keys():
                 data.append(obj)
 
     log = open(os.path.join(output_dir, "log.txt"), 'r')
 
     df = pd.json_normalize(data)
     plt.plot(df['iteration'], df['total_loss'], label='total loss')
-    #plt.plot(df['iteration'], df['validation_loss'], label='validation loss')
+    plt.plot(df['iteration'], df['validation_loss'], label='validation loss')
     plt.xlabel('iteration #, 1 epoch = %i iterations' %
                compute_params(os.path.join(output_dir, 'config.yaml'))['one_epoch'])
     plt.legend()
