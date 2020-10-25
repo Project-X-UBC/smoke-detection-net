@@ -158,7 +158,7 @@ def do_train(cfg, model, resume=False):
                     and iteration != max_iter - 1
             ):
                 results = do_test(cfg, model)
-                storage.put_scalars(**results)
+                storage.put_scalars(**results['metrics'])
                 val_loss = compute_val_loss(cfg, model)
 
                 if cfg.EARLY_STOPPING.ENABLE:
