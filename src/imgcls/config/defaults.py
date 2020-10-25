@@ -1,12 +1,3 @@
-"""
-@Copyright (c) tkianai All Rights Reserved.
-@Author         : tkianai
-@Github         : https://github.com/tkianai
-@Date           : 2020-04-26 14:26:03
-@FilePath       : /ImageCls.detectron2/imgcls/config/defaults.py
-@Description    :
-"""
-
 from detectron2.config.defaults import _C
 from detectron2.config import CfgNode as CN
 
@@ -40,3 +31,10 @@ _C.MODEL.POS_WEIGHT = [1 for i in range(16)]
 
 # eval only mode
 _C.EVAL_ONLY = False
+
+# early stopping mode
+_C.EARLY_STOPPING = CN()
+_C.EARLY_STOPPING.ENABLE = False
+_C.EARLY_STOPPING.MONITOR = ''
+_C.EARLY_STOPPING.PATIENCE = 0
+_C.EARLY_STOPPING.MODE = 'max'

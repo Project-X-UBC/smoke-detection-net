@@ -15,3 +15,20 @@ Modify parameters in the set_params() method inside main and then run:
 ```
 python main.py
 ```
+
+## Jupyter Notebook on a GCP instance
+Follow this [blog](https://towardsdatascience.com/running-jupyter-notebook-in-google-cloud-platform-in-15-min-61e16da34d52)
+to configure running Jupyter Notebooks on a GCP compute instance.
+
+The following is the command to run Jupyter (replace '5000' with the configured port):
+```
+jupyter notebook --no-browser --port=5000
+```
+
+## TensorBoard
+To run TensorBoard during training on a remote VM, `cd` to the root directory of this repo and execute (replace '5000' with configured port):
+```
+tensorboard --logdir output --port 5000 --bind_all
+```
+
+Assumes the Jupyter Notebook steps have been followed, i.e. external static IP, TCP port, etc.
