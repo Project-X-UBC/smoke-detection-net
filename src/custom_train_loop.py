@@ -5,6 +5,7 @@ import logging
 import os
 from collections import OrderedDict
 import torch
+from torch import nn
 from torch.nn.parallel import DistributedDataParallel
 
 import detectron2.utils.comm as comm
@@ -77,10 +78,15 @@ def do_test(cfg, model):
 def compute_val_loss(cfg, model):
     data_loader = build_test_loader(cfg, cfg.DATASETS.TEST[0])  # only compute loss on first test dataset
     running_loss = 0.0
-    with torch.set_grad_enabled(False):
+    model.eval()
+    criterion = nn.BCELoss()
+    with torch.no_grad():
         for idx, data in enumerate(data_loader):
-            _, _, losses_reduced = get_loss(data, model)
-            running_loss += losses_reduced
+            result = model(data)
+            target = torch.as_tensor(data[0]['label'], dtype=torch.float).to(model.device)
+            loss = criterion(result[0]["pred"], target)
+            running_loss += loss.item()
+    model.train()
     return running_loss / len(data_loader)
 
 
@@ -150,7 +156,6 @@ def do_train(cfg, model, resume=False):
             ):
                 results = do_test(cfg, model)
                 val_loss = compute_val_loss(cfg, model)
-                storage.put_scalar('validation_loss', val_loss)
 
                 if cfg.EARLY_STOPPING.ENABLE:
                     curr = None
@@ -178,6 +183,8 @@ def do_train(cfg, model, resume=False):
                         logger.info("Early stopping metric %s did not improve, current %.04f, best %.04f" %
                                     (cfg.EARLY_STOPPING.MONITOR, curr, best_monitor_metric))
                         es_count += 1
+
+                storage.put_scalar('validation_loss', val_loss)
 
                 # Compared to "train_net.py", the test results are not dumped to EventStorage
                 comm.synchronize()
@@ -270,4 +277,3 @@ def main(num_gpus=1, resume=False):
 
 if __name__ == "__main__":
     main()
-
