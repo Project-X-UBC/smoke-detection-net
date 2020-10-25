@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git config --local core.hooksPath .githooks/
+
 read -p "Download and init miniconda? (y/n)?: " input
 if [[ $input == "y" ]]; then
   # install conda

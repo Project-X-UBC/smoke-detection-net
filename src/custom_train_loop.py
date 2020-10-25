@@ -158,6 +158,7 @@ def do_train(cfg, model, resume=False):
                     and iteration != max_iter - 1
             ):
                 results = do_test(cfg, model)
+                storage.put_scalars(**results)
                 val_loss = compute_val_loss(cfg, model)
 
                 if cfg.EARLY_STOPPING.ENABLE:
@@ -176,7 +177,6 @@ def do_train(cfg, model, resume=False):
                                        curr, best_monitor_metric):
                         best_monitor_metric = curr
                         es_count = 0
-                        storage.put_scalar(cfg.EARLY_STOPPING.MONITOR, curr)
                         logger.info("Best metric %s improved to %0.4f" %
                                     (cfg.EARLY_STOPPING.MONITOR, curr))
                         # update best model
@@ -187,7 +187,6 @@ def do_train(cfg, model, resume=False):
                                     (cfg.EARLY_STOPPING.MONITOR, curr, best_monitor_metric))
                         es_count += 1
 
-                # Compared to "train_net.py", the test results are not dumped to EventStorage
                 comm.synchronize()
 
             if iteration - start_iter > 5 and (
