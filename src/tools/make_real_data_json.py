@@ -32,7 +32,7 @@ def train_test_val_split(filenames):
 def unify_files():
     # In case there's already been a split, put the files back together in a single frames folder before splitting again
     if os.path.isdir(f'{DATA_FOLDER}/train'):
-        os.mkdir(f'{DATA_FOLDER}/frames')
+        os.makedirs(f'{DATA_FOLDER}/frames', exist_ok=True)
         for folder in ('train', 'test', 'val'):
             for filename in os.listdir(f'{DATA_FOLDER}/{folder}'):
                 os.rename(f'{DATA_FOLDER}/{folder}/{filename}', f'{DATA_FOLDER}/frames/{filename}')
@@ -63,7 +63,7 @@ def accumulate_real_data_json(image_root):
             if filename not in labels:
                 continue
             record = {
-                'file_name': os.path.abspath(os.path.join(DATA_FOLDER, phase, str(filename))),
+                'file_name': os.path.abspath(os.path.join(DATA_FOLDER, "frames", str(filename))),
                 'image_id' : int(np.where(filenames == filename)[0]),
                 'label'    : labels[filename]
             }
@@ -76,7 +76,7 @@ def make_real_data_main():
     # Accumulate train
     unify_files()
     dataset_dicts = accumulate_real_data_json(DATA_FOLDER)
-    split_files(dataset_dicts)
+    #split_files(dataset_dicts)
     # Accumulate val
     # Save
     print('Saving the JSON files...')
