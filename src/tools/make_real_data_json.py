@@ -1,15 +1,4 @@
-"""
-@Copyright (c) tkianai All Rights Reserved.
-@Author         : tkianai
-@Github         : https://github.com/tkianai
-@Date           : 2020-04-26 17:27:16
-@FilePath       : /ImageCls.detectron2/tools/make_imagenet_json.py
-@Description    :
-"""
-
-import re
 import os
-import argparse
 import json
 from tqdm import tqdm
 import numpy as np
@@ -19,21 +8,6 @@ RANDOM_SEED = 42
 TEST_SIZE = .2
 VALIDATION_SIZE = .25
 DATA_FOLDER = '../../data/full'
-ARCHIVE_META = {
-    'train': 'train_set',
-    'val': 'test_set',
-}
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Make imagenet dataset d2-style")
-    parser.add_argument('--path', type=str, help="Path of the directory containing the image data")
-    args = parser.parse_args()
-
-    assert os.path.exists(os.path.join(args.path, ARCHIVE_META['train']))
-    assert os.path.exists(os.path.join(args.path, ARCHIVE_META['val']))
-
-    return args
 
 
 def get_multi_label_array(index):
@@ -89,7 +63,7 @@ def accumulate_real_data_json(image_root):
             if filename not in labels:
                 continue
             record = {
-                'file_name': str(filename),
+                'file_name': os.path.abspath(os.path.join(DATA_FOLDER, phase, str(filename))),
                 'image_id' : int(np.where(filenames == filename)[0]),
                 'label'    : labels[filename]
             }
@@ -105,7 +79,6 @@ def make_real_data_main():
     split_files(dataset_dicts)
     # Accumulate val
     # Save
-    # TODO: add arg for train, val, test json file names
     print('Saving the JSON files...')
     with open(os.path.join(DATA_FOLDER, "train.json"), "w") as w_obj:
         json.dump(dataset_dicts['train'], w_obj)
