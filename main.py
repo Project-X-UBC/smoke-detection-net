@@ -63,7 +63,7 @@ def update_config(params, config_file='src/config.yaml'):
     cfg['MODEL']['MNET']['WIDTH_MULT'] = params['base_multiplier']
     cfg['OUTPUT_DIR'] = os.path.abspath(create_output_dir(params['output_dir']))
     cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
-    cfg['MODEL']['POS_WEIGHT'] = [max(1, round(i)) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
+    cfg['MODEL']['POS_WEIGHT'] = [round(i * 10) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
     cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
     cfg['EVAL_ONLY'] = params['eval_only_mode']
     cfg['SEED'] = params['seed']
@@ -76,7 +76,10 @@ def update_config(params, config_file='src/config.yaml'):
         cfg['TEST']['EVAL_PERIOD'] = int(cfg['SOLVER']['MAX_ITER'] / params['num_validation_steps'])
 
     if params['load_pretrained_weights'] or params['eval_only_mode']:
-        cfg['MODEL']['WEIGHTS'] = os.path.abspath(params['model_weights'])
+        if 'detectron2://' in params['model_weights']:
+            cfg['MODEL']['WEIGHTS'] = params['model_weights']
+        else:
+            cfg['MODEL']['WEIGHTS'] = os.path.abspath(params['model_weights'])
     else:
         cfg['MODEL']['WEIGHTS'] = ''
 
