@@ -16,7 +16,7 @@ def seed_all(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True  # may result in a slowdown
+    torch.backends.cudnn.deterministic = True  # may result in a slowdown if set to True
 
 
 def calculate_pos_weights(data):
@@ -46,8 +46,8 @@ def create_output_dir(output_dir):
     return output_dir
 
 
-def update_config(params, config_path='src/config.yaml'):
-    with open(config_path, 'r') as yml_file:
+def update_config(params, config_file='src/config.yaml'):
+    with open(config_file, 'r') as yml_file:
         cfg = yaml.full_load(yml_file)
 
     with open(os.path.join(params['data_dir'], 'train.json'), 'r') as json_file:
@@ -59,10 +59,11 @@ def update_config(params, config_path='src/config.yaml'):
     cfg['SOLVER']['IMS_PER_BATCH'] = params['batch_size']
     cfg['SOLVER']['MAX_ITER'] = compute_max_iter(len(train_json), params['batch_size'], params['num_epochs'])
     cfg['MODEL']['CLSNET']['INPUT_SIZE'] = params['input_size']
+    cfg['MODEL']['CLSNET']['NUM_CLASSES'] = params['num_classes']
     cfg['MODEL']['MNET']['WIDTH_MULT'] = params['base_multiplier']
     cfg['OUTPUT_DIR'] = os.path.abspath(create_output_dir(params['output_dir']))
     cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
-    cfg['MODEL']['POS_WEIGHT'] = [int(i) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
+    cfg['MODEL']['POS_WEIGHT'] = [max(1, round(i)) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
     cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
     cfg['EVAL_ONLY'] = params['eval_only_mode']
     cfg['SEED'] = params['seed']
@@ -80,7 +81,7 @@ def update_config(params, config_path='src/config.yaml'):
         cfg['MODEL']['WEIGHTS'] = ''
 
     # update config.yml file
-    with open(config_path, 'w') as yml_file:
+    with open(config_file, 'w') as yml_file:
         yaml.dump(cfg, yml_file)
 
 
@@ -89,6 +90,9 @@ def set_params():
     Sets the parameters of the pipeline
     """
     params = {
+        # configuration file
+        'config': 'src/config.yaml',  # 'src/config_resnet.yaml' to load pretrained resnet model
+
         # compute settings
         'num_gpus': 1,  # number of gpus, can check with `nvidia-smi`
 
@@ -101,26 +105,28 @@ def set_params():
         'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
-        'data_dir': './data/synthetic',
-        'output_dir': './output',  # default is ./output/$date_$time if left as empty string
+        'data_dir': './data/full',
+        'output_dir': './output/test_model',  # default is ./output/$date_$time if left as empty string
         'model_weights': './output/model_final.pth',  # path to model weights file for training with pretrained weights
+                                                      # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
-        'patience': 10,  # number of val steps where no improvement is made before triggering early stopping
         'base_lr': 0.01,
-        'batch_size': 64,
+        'batch_size': 16,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
-        'num_epochs': 100,  # total number of epochs, can be < 1
-        'num_validation_steps': 50,  # number of evaluations on the validation set during training
+        'num_classes': 16,  # specifies the number of classes + number of nodes in final model layer
 
         # misc
-        'checkpoint_period': 5000,  # save a checkpoint after every this number of iterations
+        'patience': 10,  # number of val steps where no improvement is made before triggering early stopping
+        'num_epochs': 50,  # total number of epochs, can be < 1
+        'num_validation_steps': 100,  # number of evaluations on the validation set during training
+        'checkpoint_period': 10000,  # save a checkpoint after every this number of iterations
         'num_workers': 4,  # number of data loading threads
         'seed': 999  # seed so computations are deterministic
     }
 
-    update_config(params)
+    update_config(params, config_file=params['config'])
     seed_all(params['seed'])
 
     return params
@@ -128,6 +134,8 @@ def set_params():
 
 if __name__ == '__main__':
     p = set_params()
-    custom_train_loop.main(num_gpus=p['num_gpus'], resume=p['resume'])
+    custom_train_loop.main(num_gpus=p['num_gpus'],
+                           config_file=p['config'],
+                           resume=p['resume'])
     if not p['eval_only_mode']:
         plot_loss(p['output_dir'])
