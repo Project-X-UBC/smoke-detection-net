@@ -3,11 +3,21 @@ import json
 from tqdm import tqdm
 import numpy as np
 from sklearn.model_selection import GroupShuffleSplit
+import argparse
 
 RANDOM_SEED = 42
 TEST_SIZE = .2
 VALIDATION_SIZE = .25
-DATA_FOLDER = '../../data/full'
+DATA_FOLDER = os.path.abspath('../../data/full')
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Make imagenet dataset d2-style")
+    parser.add_argument('--path', type=str, help="Path of the directory containing the image data", required=False)
+    args = parser.parse_args()
+    if args.path is not None:
+        args.path = os.path.abspath(args.path)
+    return args
 
 
 def get_multi_label_array(index):
@@ -71,11 +81,13 @@ def accumulate_real_data_json(image_root):
     return dataset_dicts
 
 
-def make_real_data_main():
+def make_real_data_main(args):
     # to split the train/test/val datasets
     # Accumulate train
     unify_files()
-    dataset_dicts = accumulate_real_data_json(DATA_FOLDER)
+    if args.path is None:
+        args.path = DATA_FOLDER
+    dataset_dicts = accumulate_real_data_json(args.path)
     #split_files(dataset_dicts)
     # Accumulate val
     # Save
@@ -89,4 +101,5 @@ def make_real_data_main():
 
 
 if __name__ == "__main__":
-    make_real_data_main()
+    args = parse_args()
+    make_real_data_main(args)
