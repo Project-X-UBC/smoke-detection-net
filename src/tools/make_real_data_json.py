@@ -15,6 +15,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Make real dataset")
     parser.add_argument('--path', type=str, help="Path of the directory containing the image data", required=False)
     parser.add_argument('--gridsize', type=int, help="Size of the label grid", required=False)
+    parser.add_argument('--mankind', type=str, help="Use if you want AI for Mankind. --mankind val or --mankind test, depending on which set you want it for.")
     args = parser.parse_args()
     if args.path is not None:
         args.path = os.path.abspath(args.path)
@@ -75,14 +76,36 @@ def accumulate_real_data_json(image_root, grid_size):
     return dataset_dicts
 
 
+def make_mankind_set(args):
+    # Call this once you already have a split but want to use AI for Mankind's set instead of your val or test set
+    json_filename = os.path.join(args.path, '../', f'labels_{args.gridsize}.json')
+    with open(json_filename, 'rb') as f:
+        labels = json.load(f)['labels']
+    filenames = os.listdir(os.path.join(args.path, 'mankind'))
+    dataset = []
+    for filename in filenames:
+        record = {
+            'file_name': os.path.abspath(os.path.join(args.path, 'mankind', filename)),
+            'image_id' : int(np.where(filenames == filename)[0]),
+            'label'    : labels[filename]
+        }
+        dataset.append(record)
+    return dataset
+
+
 def make_real_data_main(args):
     # to split the train/test/val datasets
     # Accumulate train
-    unify_files(args.gridsize)
+    # unify_files()
     if args.path is None:
         args.path = DATA_FOLDER
     if args.gridsize is None:
         args.gridsize = 4
+    if args.mankind in ('val', 'test'):
+        mankind_set = make_mankind_set(args)
+        with open(os.path.join(args.path, f"{args.mankind}.json"), "w") as w_obj:
+            json.dump(mankind_set, w_obj)
+        return
     dataset_dicts = accumulate_real_data_json(args.path, args.gridsize)
     #split_files(dataset_dicts)
     # Accumulate val

@@ -10,13 +10,13 @@ from concurrent.futures import ProcessPoolExecutor
 # If it is called again and done_videos.json already exists, it will skip the videos that have already been split
 
 
-#VIDEO_FOLDER = '../../datasets/alert_wildfire/raw_data'
+VIDEO_FOLDER = '../../datasets/alert_wildfire/raw_data'
 #FRAMES_FOLDER = '../../datasets/frames_test'
 #DONE_VIDEOS_PATH = '../../datasets/done_videos.json'
-VIDEO_FOLDER = '../data/full/raw_data'
+#VIDEO_FOLDER = '../data/full/raw_data'
 FRAMES_FOLDER = '../data/full/frames'
 DONE_VIDEOS_PATH = '../data/done_videos.json'
-FRAMES_PER_VIDEO = 100
+FRAMES_PER_VIDEO = 200
 
 
 def is_image_grayscale(img):
@@ -27,8 +27,20 @@ def is_image_grayscale(img):
     img = img[width//3 : width//3*2, height//3 : height//3*2, :]
     b,g,r = img[:,:,0], img[:,:,1], img[:,:,2]
     similar = np.vectorize(lambda x, y: abs(int(x)-int(y)) < 10)
-    if (similar(b,g)).all() and (similar(b,r)).all(): return True
+    similar_bg, similar_br = similar(b, g), similar(b, r)
+    percent_bw = (np.sum(similar_bg) + np.sum(similar_br)) / (similar_bg.size + similar_br.size)
+    if percent_bw >= .7: return True
     return False
+
+
+def is_image_bad(img):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    hue = np.mean(hsv[:,:,0]*2)
+    is_gray = is_image_grayscale(img)
+    is_dark = np.mean(hsv[:,:,2]/255*100) < 39
+    is_orange = (hue >= 0 and hue <= 40)
+    is_blurry = cv2.Laplacian(img, cv2.CV_64F).var() < 400
+    return is_gray or is_dark or is_orange or is_blurry
 
 
 def split_video(videoname):
@@ -42,14 +54,15 @@ def split_video(videoname):
     while saved_frames_count < FRAMES_PER_VIDEO:
         success, img = vidcap.read()
         if frame % frame_gap == 0:
-            while success and is_image_grayscale(img):
-                # I make 10 frame jumps here because checking for b&w is slow
+            while success and is_image_bad(img):
+                # I make 10 frame jumps here because checking for b&w, hue, etc. is slow
                 for _ in range(10):
                     success, img = vidcap.read()
                     frame += 1
             if not success:
                 break
             jpg_name = videoname + '_frame_' + str(frame) + '.jpg'
+            img = cv2.resize(img, (224, 224))
             cv2.imwrite(FRAMES_FOLDER + '/' + jpg_name, img)
             saved_frames_count += 1
         frame += 1
@@ -57,6 +70,7 @@ def split_video(videoname):
     done_videos = get_done_videos()
     done_videos.add(videoname)
     save_done_videos(done_videos)
+    print(f'Got {saved_frames_count} frames')
 
 
 def get_done_videos():
@@ -72,7 +86,7 @@ def get_done_videos():
 def save_done_videos(done_videos):
     with open(DONE_VIDEOS_PATH, 'w') as f:
         json.dump(list(done_videos), f)
-    print(done_videos)
+    print(len(done_videos))
 
 
 if __name__ == '__main__':
