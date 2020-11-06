@@ -12,19 +12,13 @@ DATA_FOLDER = os.path.abspath('../../data/full')
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Make imagenet dataset d2-style")
+    parser = argparse.ArgumentParser(description="Make real dataset")
     parser.add_argument('--path', type=str, help="Path of the directory containing the image data", required=False)
+    parser.add_argument('--gridsize', type=int, help="Size of the label grid", required=False)
     args = parser.parse_args()
     if args.path is not None:
         args.path = os.path.abspath(args.path)
     return args
-
-
-def get_multi_label_array(index):
-    labels = np.zeros(16, dtype=int)
-    if index != 0:
-        labels[index-1] = 1
-    return labels.tolist()
 
 
 def train_test_val_split(filenames):
@@ -39,33 +33,33 @@ def train_test_val_split(filenames):
     return {'train': train, 'test': test, 'val': val}
 
 
-def unify_files():
+def unify_files(image_root):
     # In case there's already been a split, put the files back together in a single frames folder before splitting again
-    if os.path.isdir(f'{DATA_FOLDER}/train'):
-        os.makedirs(f'{DATA_FOLDER}/frames', exist_ok=True)
+    if os.path.isdir(f'{image_root}/train'):
+        os.makedirs(f'{image_root}/frames', exist_ok=True)
         for folder in ('train', 'test', 'val'):
-            for filename in os.listdir(f'{DATA_FOLDER}/{folder}'):
-                os.rename(f'{DATA_FOLDER}/{folder}/{filename}', f'{DATA_FOLDER}/frames/{filename}')
+            for filename in os.listdir(f'{image_root}/{folder}'):
+                os.rename(f'{image_root}/{folder}/{filename}', f'{image_root}/frames/{filename}')
 
 
-def split_files(dataset_dicts):
+def split_files(dataset_dicts, image_root):
     # Split the files into train, test, and val again
     print('Now splitting the files into different folders...')
-    if not os.path.isdir(f'{DATA_FOLDER}/train'):
+    if not os.path.isdir(f'{image_root}/train'):
         for phase in ('train', 'test', 'val'):
-            os.mkdir(f'{DATA_FOLDER}/{phase}')
+            os.mkdir(f'{image_root}/{phase}')
     for phase in dataset_dicts:
         for record in dataset_dicts[phase]:
             filename = record['file_name']
-            os.rename(f'{DATA_FOLDER}/frames/{filename}', f'{DATA_FOLDER}/{phase}/{filename}')
+            os.rename(f'{image_root}/frames/{filename}', f'{image_root}/{phase}/{filename}')
 
 
-def accumulate_real_data_json(image_root):
+def accumulate_real_data_json(image_root, grid_size):
     print('Accumulating the JSON...')
-    json_filename = os.path.join(image_root, 'labels.json')
+    json_filename = os.path.join(image_root, '../', f'labels_{grid_size}.json')
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
-    filenames = np.array(os.listdir(f'{image_root}/frames'))
+    filenames = np.array(os.listdir(image_root))
     phases = train_test_val_split(filenames)
     dataset_dicts = {'train': [], 'test': [], 'val': []}
     for phase in phases:
@@ -73,7 +67,7 @@ def accumulate_real_data_json(image_root):
             if filename not in labels:
                 continue
             record = {
-                'file_name': os.path.abspath(os.path.join(DATA_FOLDER, "frames", str(filename))),
+                'file_name': os.path.abspath(os.path.join(image_root, str(filename))),
                 'image_id' : int(np.where(filenames == filename)[0]),
                 'label'    : labels[filename]
             }
@@ -84,19 +78,21 @@ def accumulate_real_data_json(image_root):
 def make_real_data_main(args):
     # to split the train/test/val datasets
     # Accumulate train
-    unify_files()
+    unify_files(args.gridsize)
     if args.path is None:
         args.path = DATA_FOLDER
-    dataset_dicts = accumulate_real_data_json(args.path)
+    if args.gridsize is None:
+        args.gridsize = 4
+    dataset_dicts = accumulate_real_data_json(args.path, args.gridsize)
     #split_files(dataset_dicts)
     # Accumulate val
     # Save
     print('Saving the JSON files...')
-    with open(os.path.join(DATA_FOLDER, "train.json"), "w") as w_obj:
+    with open(os.path.join(args.path, "train.json"), "w") as w_obj:
         json.dump(dataset_dicts['train'], w_obj)
-    with open(os.path.join(DATA_FOLDER, "test.json"), "w") as w_obj:
+    with open(os.path.join(args.path, "test.json"), "w") as w_obj:
         json.dump(dataset_dicts['test'], w_obj)
-    with open(os.path.join(DATA_FOLDER, "val.json"), "w") as w_obj:
+    with open(os.path.join(args.path, "val.json"), "w") as w_obj:
         json.dump(dataset_dicts['val'], w_obj)
 
 

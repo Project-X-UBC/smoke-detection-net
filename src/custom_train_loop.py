@@ -83,6 +83,7 @@ def compute_val_loss(cfg, model):
     with torch.no_grad():
         for idx, data in enumerate(data_loader):
             result = model(data)
+            logger.info(result)
             target = torch.as_tensor(data[0]['label'], dtype=torch.float).to(model.device)
             loss = criterion(result[0]["pred"], target)
             running_loss += loss.item()
