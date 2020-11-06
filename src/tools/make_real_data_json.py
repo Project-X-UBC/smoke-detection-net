@@ -78,7 +78,7 @@ def accumulate_real_data_json(image_root, grid_size):
 
 def make_mankind_set(args):
     # Call this once you already have a split but want to use AI for Mankind's set instead of your val or test set
-    json_filename = os.path.join(args.path, '../', f'labels_{args.gridsize}.json')
+    json_filename = os.path.join(args.path, f'labels_mankind_{args.gridsize}.json')
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
     filenames = os.listdir(os.path.join(args.path, 'mankind'))
@@ -86,7 +86,7 @@ def make_mankind_set(args):
     for filename in filenames:
         record = {
             'file_name': os.path.abspath(os.path.join(args.path, 'mankind', filename)),
-            'image_id' : int(np.where(filenames == filename)[0]),
+            'image_id' : len(dataset),
             'label'    : labels[filename]
         }
         dataset.append(record)
