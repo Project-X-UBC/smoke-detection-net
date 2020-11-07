@@ -4,7 +4,7 @@ DATALOADER:
 DATASETS:
   TEST: ("smokenet_val", )
   TRAIN: ("smokenet_train", )
-DATA_DIR_PATH: /home/raphael_menoni/smoke-detection-net/data/full/bigsmoke
+DATA_DIR_PATH: /home/rodriguedeschaetzen/smoke-detection-net/data/full
 EARLY_STOPPING:
   ENABLE: true
   MODE: max
@@ -28,30 +28,30 @@ MODEL:
     - linear
     WIDTH_MULT: 0.25
   POS_WEIGHT:
-  - 27
-  - 4
-  - 26
-  - 274800000
-  - 5
-  - 0
+  - 72
+  - 32
+  - 34
+  - 67
+  - 43
   - 11
-  - 26
-  - 248
-  - 23
-  - 8
-  - 182
-  - 274800000
-  - 274800000
-  - 71
+  - 13
+  - 39
   - 51
+  - 22
+  - 23
+  - 67
+  - 636
+  - 223
+  - 224
+  - 507
   WEIGHTS: ''
-OUTPUT_DIR: /home/raphael_menoni/smoke-detection-net/output
+OUTPUT_DIR: /home/rodriguedeschaetzen/smoke-detection-net/output/test_model
 SEED: 999
 SOLVER:
   BASE_LR: 0.01
-  IMS_PER_BATCH: 32
-  MAX_ITER: 8587
+  IMS_PER_BATCH: 16
+  MAX_ITER: 113193
   STEPS: (150000, 180000)
 TEST:
-  EVAL_PERIOD: 171
+  EVAL_PERIOD: 1131
 VERSION: 2

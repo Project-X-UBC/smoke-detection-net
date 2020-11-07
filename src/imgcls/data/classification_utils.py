@@ -25,10 +25,10 @@ def build_transform_gen(cfg, is_train):
     logger = logging.getLogger("detectron2.data.classification_utils")
     tfm_gens = [T.Resize((input_size, input_size))]
     if is_train:
-        # tfm_gens.append(T.RandomContrast(0.5, 1.5))
-        # tfm_gens.append(T.RandomBrightness(0.5, 1.5))
-        # tfm_gens.append(T.RandomSaturation(0.5, 1.5))
-        # tfm_gens.append(T.RandomFlip())  # TODO: specify transformations
+        tfm_gens.append(T.RandomContrast(0.5, 1.5))
+        tfm_gens.append(T.RandomBrightness(0.5, 1.5))
+        tfm_gens.append(T.RandomSaturation(0.5, 1.5))
+        # tfm_gens.append(T.RandomFlip())
         logger.info(
             "TransformGens used in training[Updated]: " + str(tfm_gens))
     return tfm_gens

@@ -20,6 +20,7 @@ import detectron2.utils.comm as comm
 from detectron2.data import MetadataCatalog
 from detectron2.evaluation.evaluator import DatasetEvaluator
 import pandas as pd
+import numpy as np
 
 
 class ImageNetEvaluator(DatasetEvaluator):
@@ -113,10 +114,16 @@ class ImageNetEvaluator(DatasetEvaluator):
         except ZeroDivisionError:
             precision = float('Nan')
 
+        f1_score = float('Nan')
+        if not (np.isnan(precision) or np.isnan(recall)):
+            f1_score = 2 * precision * recall / (precision + recall)
+
         self._logger.info("Accuracy %.4f: " % accuracy)
         self._logger.info("Recall %.4f: " % recall)
         self._logger.info("Precision %.4f: " % precision)
+        self._logger.info("F1-score %.4f: " % f1_score)
 
-        result = OrderedDict(metrics={"accuracy": accuracy.item(), "recall": recall, "precision": precision})
+        result = OrderedDict(metrics={"accuracy": accuracy.item(), "recall": recall,
+                                      "precision": precision, "f1-score": f1_score})
         return result
 
