@@ -103,6 +103,11 @@ class ImageNetEvaluator(DatasetEvaluator):
         true_neg = torch.sum(torch.isnan(confusion_vector)).item()
         false_neg = torch.sum(confusion_vector == 0).item()
 
+        self._logger.info("True pos %.0f" % true_pos)
+        self._logger.info("False pos %.0f" % false_pos)
+        self._logger.info("True neg %.0f" % true_neg)
+        self._logger.info("False neg %.0f" % false_neg)
+
         assert accuracy == ((true_pos + true_neg) / (true_pos + false_pos + true_neg + false_neg))
         # handle possibility of denominator being 0
         try:
