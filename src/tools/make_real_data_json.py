@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument('--path', type=str, help="Path of the directory containing the image data", required=False)
     parser.add_argument('--gridsize', type=int, help="Size of the label grid", required=False)
     parser.add_argument('--mankind', type=str, help="Use if you want AI for Mankind. --mankind val or --mankind test, depending on which set you want it for.")
+    parser.add_argument('--labelpath', type=str, help="Path of the Label file. Optional", required=False)
     args = parser.parse_args()
     if args.path is not None:
         args.path = os.path.abspath(args.path)
@@ -55,9 +56,9 @@ def split_files(dataset_dicts, image_root):
             os.rename(f'{image_root}/frames/{filename}', f'{image_root}/{phase}/{filename}')
 
 
-def accumulate_real_data_json(image_root, grid_size):
+def accumulate_real_data_json(image_root, grid_size, labelpath=None):
     print('Accumulating the JSON...')
-    json_filename = os.path.join(image_root, '../', f'labels_{grid_size}.json')
+    json_filename = os.path.join(image_root, '../', f'labels_{grid_size}.json') if labelpath is None else labelpath
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
     filenames = np.array(os.listdir(image_root))
@@ -106,7 +107,7 @@ def make_real_data_main(args):
         with open(os.path.join(args.path, f"{args.mankind}.json"), "w") as w_obj:
             json.dump(mankind_set, w_obj)
         return
-    dataset_dicts = accumulate_real_data_json(args.path, args.gridsize)
+    dataset_dicts = accumulate_real_data_json(args.path, args.gridsize, args.labelpath)
     #split_files(dataset_dicts)
     # Accumulate val
     # Save
