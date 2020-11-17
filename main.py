@@ -108,14 +108,14 @@ def set_params():
         'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
-        'data_dir': './data/full',
+        'data_dir': './data/full/frames_100',
         'output_dir': './output/test_model',  # default is ./output/$date_$time if left as empty string
         'model_weights': './output/model_final.pth',  # path to model weights file for training with pretrained weights
                                                       # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
-        'base_lr': 0.01,
-        'batch_size': 16,
+        'base_lr': 0.05,
+        'batch_size': 64,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
         'num_classes': 16,  # specifies the number of classes + number of nodes in final model layer
@@ -134,6 +134,7 @@ def set_params():
 
     return params
 
+"""
 
 if __name__ == '__main__':
     p = set_params()
@@ -142,3 +143,19 @@ if __name__ == '__main__':
                            resume=p['resume'])
     if not p['eval_only_mode']:
         plot_loss(p['output_dir'])
+
+"""
+
+
+if __name__ == '__main__':
+    for gridsize in range(1, 11):
+        os.system(f'python src/tools/make_real_data_json.py --path data/full/frames_100 --gridsize {gridsize}')
+        p = set_params()
+        p['output_dir'] = f"./output/label_gridsize_{gridsize}"
+        p['num_classes'] = gridsize**2
+        update_config(p, config_file=p['config'])
+        custom_train_loop.main(num_gpus=p['num_gpus'],
+                               config_file=p['config'],
+                               resume=p['resume'])
+        if not p['eval_only_mode']:
+            plot_loss(p['output_dir'])
