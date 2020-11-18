@@ -58,9 +58,12 @@ def update_config(params, config_file='src/config.yaml'):
     cfg['SOLVER']['BASE_LR'] = params['base_lr']
     cfg['SOLVER']['IMS_PER_BATCH'] = params['batch_size']
     cfg['SOLVER']['MAX_ITER'] = compute_max_iter(len(train_json), params['batch_size'], params['num_epochs'])
+    cfg['SOLVER']['CHECKPOINT_PERIOD'] = params['checkpoint_period']
     cfg['MODEL']['CLSNET']['INPUT_SIZE'] = params['input_size']
     cfg['MODEL']['CLSNET']['NUM_CLASSES'] = params['num_classes']
     cfg['MODEL']['MNET']['WIDTH_MULT'] = params['base_multiplier']
+    cfg['MODEL']['BACKBONE']['NAME'] = params['backbone']
+    cfg['MODEL']['BACKBONE']['FREEZE_AT'] = params['freeze_at']
     cfg['OUTPUT_DIR'] = os.path.abspath(create_output_dir(params['output_dir']))
     cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
     cfg['MODEL']['POS_WEIGHT'] = [round(i) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
@@ -96,6 +99,10 @@ def set_params():
         # configuration file
         'config': 'src/config.yaml',  # 'src/config_resnet.yaml' to load pretrained resnet model
 
+        # architecture
+        'backbone': 'build_mnetv1_backbone',  # select model backbone
+                                              # custom backbones are in src/imgcls/modeling/backbone
+
         # compute settings
         'num_gpus': 1,  # number of gpus, can check with `nvidia-smi`
 
@@ -104,7 +111,7 @@ def set_params():
         'resume': False,  # resume training from last checkpoint in 'output_dir', useful when training was interrupted
         'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
         'early_stopping': True,  # option to early stop model training if a certain condition is met
-        'early_stopping_monitor': 'accuracy',  # metric to monitor for early stopping e.g. validation_loss, accuracy...
+        'early_stopping_monitor': 'f1-score',  # metric to monitor for early stopping e.g. validation_loss, accuracy...
         'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
@@ -119,6 +126,7 @@ def set_params():
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
         'num_classes': 16,  # specifies the number of classes + number of nodes in final model layer
+        'freeze_at': 1,  # freeze layers of network
 
         # misc
         'patience': 10,  # number of val steps where no improvement is made before triggering early stopping
