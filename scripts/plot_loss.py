@@ -16,10 +16,11 @@ def plot_loss(output_dir):
     log = open(os.path.join(output_dir, "log.txt"), 'r')
 
     df = pd.json_normalize(data)
-    plt.plot(df['iteration'], df['total_loss'], label='total loss')
-    plt.plot(df['iteration'], df['validation_loss'], label='validation loss')
+    plt.plot(df['iteration'], df['total_loss'], label='Training')
+    plt.plot(df['iteration'], df['validation_loss'], label='Validation')
     plt.xlabel('iteration #, 1 epoch = %i iterations' %
                compute_params(os.path.join(output_dir, 'config.yaml'))['one_epoch'])
+    plt.ylabel("Loss")
     plt.legend()
     plt.title("Model loss")
     plt.savefig(os.path.join(output_dir, 'model_loss.png'))

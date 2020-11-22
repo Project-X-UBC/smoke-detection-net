@@ -1,12 +1,3 @@
-"""
-@Copyright (c) tkianai All Rights Reserved.
-@Author         : tkianai
-@Github         : https://github.com/tkianai
-@Date           : 2020-04-26 19:42:05
-@FilePath       : /ImageCls.detectron2/imgcls/evaluation/imagenet_evaluation.py
-@Description    :
-"""
-
 import os
 import itertools
 import json
@@ -15,12 +6,14 @@ from collections import OrderedDict
 import torch
 from torch import nn
 from fvcore.common.file_io import PathManager
+from sklearn.metrics import roc_curve, auc
 
 import detectron2.utils.comm as comm
 from detectron2.data import MetadataCatalog
 from detectron2.evaluation.evaluator import DatasetEvaluator
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ImageNetEvaluator(DatasetEvaluator):
@@ -84,13 +77,35 @@ class ImageNetEvaluator(DatasetEvaluator):
         df.to_csv(path, index=False)
         self._logger.info("Saved results with file path: %s" % os.path.abspath(path))
 
-        pred = pred.round().view(1, -1)
-        target = target.view(1, -1)
-        correct = pred.eq(target).squeeze()
+        # reshape arrays to single dimension
+        pred = pred.view(1, -1).squeeze()
+        target = target.view(1, -1).squeeze()
+
+        # compute ROC area-under-curve
+        fpr, tpr, _ = roc_curve(target, pred)
+        roc_auc = auc(fpr, tpr)
+
+        # save ROC curve results as a plot
+        plt.figure()
+        plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.4f)' % roc_auc)
+        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Receiver operating characteristic example')
+        plt.legend(loc="lower right")
+        path = os.path.join(self._output_dir, "roc_curve.png")
+        plt.savefig(path)
+        self._logger.info("Saved ROC plot with file path: %s" % os.path.abspath(path))
+
+        # get number of correct samples with threshold == 0.5
+        pred = pred.round()
+        correct = pred.eq(target)
 
         # FIXME naive metrics
         accuracy = correct.sum().true_divide(torch.tensor(correct.size(0)))
-        confusion_vector = (pred // target).squeeze()
+        confusion_vector = (pred // target)
         # Element-wise division of the 2 tensors returns a new tensor which holds a
         # unique value for each case:
         #   1     where prediction and truth are 1 (True Positive)
@@ -123,12 +138,13 @@ class ImageNetEvaluator(DatasetEvaluator):
         if not (np.isnan(precision) or np.isnan(recall)):
             f1_score = 2 * precision * recall / (precision + recall)
 
-        self._logger.info("Accuracy %.4f: " % accuracy)
-        self._logger.info("Recall %.4f: " % recall)
-        self._logger.info("Precision %.4f: " % precision)
-        self._logger.info("F1-score %.4f: " % f1_score)
+        self._logger.info("Accuracy %.4f" % accuracy)
+        self._logger.info("Recall %.4f" % recall)
+        self._logger.info("Precision %.4f" % precision)
+        self._logger.info("F1-score %.4f" % f1_score)
+        self._logger.info("ROC AUC %.4f" % roc_auc)
 
         result = OrderedDict(metrics={"accuracy": accuracy.item(), "recall": recall,
-                                      "precision": precision, "f1-score": f1_score})
+                                      "precision": precision, "f1-score": f1_score,
+                                      "roc-auc": roc_auc})
         return result
-
