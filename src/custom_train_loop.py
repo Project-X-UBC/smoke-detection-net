@@ -3,6 +3,7 @@
 # original code from https://github.com/facebookresearch/detectron2/blob/master/tools/plain_train_net.py
 import logging
 import os
+import numpy as np
 from collections import OrderedDict
 import torch
 from torch import nn
@@ -35,7 +36,7 @@ import src.imgcls.modeling  # need this import to initialize modeling package
 from src.imgcls.data import DatasetMapper
 from src.imgcls.data.imagenet import register_imagenet_instances
 from src.imgcls.evaluation.imagenet_evaluation import ImageNetEvaluator
-from src.imgcls.evaluation.loss_eval_hook import LossEvalHook
+
 
 logger = logging.getLogger("detectron2")
 
@@ -243,6 +244,14 @@ def run(args):
 
     model = build_model(cfg)
     logger.info("Model:\n{}".format(model))
+
+    # count number of parameters for model
+    net_params = model.parameters()
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    logger.info("Number of model parameters: %.0f" % weight_count)
+
     if cfg.EVAL_ONLY:
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
             cfg.MODEL.WEIGHTS, resume=False
