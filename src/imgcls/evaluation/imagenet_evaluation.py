@@ -88,6 +88,9 @@ class ImageNetEvaluator(DatasetEvaluator):
         target = target.view(1, -1)
         correct = pred.eq(target).squeeze()
 
+        # Calculate baseline accuracy
+        baseline = torch.max(torch.tensor([(target == 0).sum(), (target == 1).sum()])).true_divide(target.size()[1])
+
         # FIXME naive metrics
         accuracy = correct.sum().true_divide(torch.tensor(correct.size(0)))
         confusion_vector = (pred // target).squeeze()
@@ -129,6 +132,7 @@ class ImageNetEvaluator(DatasetEvaluator):
         self._logger.info("F1-score %.4f: " % f1_score)
 
         result = OrderedDict(metrics={"accuracy": accuracy.item(), "recall": recall,
-                                      "precision": precision, "f1-score": f1_score})
+                                      "precision": precision, "f1-score": f1_score,
+                                      "baseline-improvement": accuracy.true_divide(baseline).item()})
         return result
 
