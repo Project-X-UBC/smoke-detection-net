@@ -4,7 +4,7 @@ DATALOADER:
 DATASETS:
   TEST: ("smokenet_val", )
   TRAIN: ("smokenet_train", )
-DATA_DIR_PATH: /home/rodriguedeschaetzen/smoke-detection-net/data/full
+DATA_DIR_PATH: /home/raphael_menoni/smoke-detection-net/data/full/frames_100
 EARLY_STOPPING:
   ENABLE: true
   MODE: max
@@ -21,37 +21,25 @@ MODEL:
   CLSNET:
     ENABLE: true
     INPUT_SIZE: 224
-    NUM_CLASSES: 16
+    NUM_CLASSES: 4
   META_ARCHITECTURE: ClsNet
   MNET:
     OUT_FEATURES:
     - linear
     WIDTH_MULT: 0.25
   POS_WEIGHT:
-  - 72
-  - 32
-  - 34
-  - 67
-  - 43
-  - 11
-  - 13
-  - 39
-  - 51
-  - 22
-  - 23
-  - 67
-  - 636
-  - 223
-  - 224
-  - 507
+  - 2
+  - 3
+  - 9
+  - 9
   WEIGHTS: ''
-OUTPUT_DIR: /home/rodriguedeschaetzen/smoke-detection-net/output/test_model
+OUTPUT_DIR: /home/raphael_menoni/smoke-detection-net/output/label_gridsize_2_threshold_1.0
 SEED: 999
 SOLVER:
-  BASE_LR: 0.01
+  BASE_LR: 0.001
   IMS_PER_BATCH: 16
-  MAX_ITER: 113193
+  MAX_ITER: 104725
   STEPS: (150000, 180000)
 TEST:
-  EVAL_PERIOD: 1131
+  EVAL_PERIOD: 1047
 VERSION: 2

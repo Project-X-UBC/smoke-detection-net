@@ -63,7 +63,7 @@ def update_config(params, config_file='src/config.yaml'):
     cfg['MODEL']['MNET']['WIDTH_MULT'] = params['base_multiplier']
     cfg['OUTPUT_DIR'] = os.path.abspath(create_output_dir(params['output_dir']))
     cfg['DATA_DIR_PATH'] = os.path.abspath(params['data_dir'])
-    cfg['MODEL']['POS_WEIGHT'] = [round(i) for i in pos_weight] if params['num_classes'] != 1 else [1]  # yaml.dump spits out garbage if pos_weight are decimals
+    cfg['MODEL']['POS_WEIGHT'] = [round(i * 10) for i in pos_weight]  # yaml.dump spits out garbage if pos_weight are decimals
     cfg['DATALOADER']['NUM_WORKERS'] = params['num_workers']
     cfg['EVAL_ONLY'] = params['eval_only_mode']
     cfg['SEED'] = params['seed']
@@ -114,7 +114,7 @@ def set_params():
                                                       # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
-        'base_lr': 0.001,
+        'base_lr': 0.01,
         'batch_size': 16,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
@@ -134,7 +134,6 @@ def set_params():
 
     return params
 
-"""
 
 if __name__ == '__main__':
     p = set_params()
@@ -143,21 +142,18 @@ if __name__ == '__main__':
                            resume=p['resume'])
     if not p['eval_only_mode']:
         plot_loss(p['output_dir'])
-
 """
 
 
 if __name__ == '__main__':
-    for gridsize in (3, 4, 7):
-        for threshold in range(10, 110, 10):
-            threshold /= 100
-            os.system(f'python src/tools/make_real_data_json.py --path data/full/frames_100 --labelpath data/full/labels_{gridsize}_{threshold}.json')
-            p = set_params()
-            p['output_dir'] = f"./output/label_gridsize_{gridsize}_threshold_{threshold}"
-            p['num_classes'] = gridsize**2
-            update_config(p, config_file=p['config'])
-            custom_train_loop.main(num_gpus=p['num_gpus'],
-                                   config_file=p['config'],
-                                   resume=p['resume'])
-            if not p['eval_only_mode']:
-                plot_loss(p['output_dir'])
+    for threshold in range(20, 100, 10):
+        threshold = threshold / 100
+        os.system(f'python src/tools/make_real_data_json.py --path data/full/frames_100 --labelpath data/full/labels_4_{threshold}.json')
+        p = set_params()
+        p['output_dir'] = "./output/label_{}".format(threshold)
+        custom_train_loop.main(num_gpus=p['num_gpus'],
+                               config_file=p['config'],
+                               resume=p['resume'])
+        if not p['eval_only_mode']:
+            plot_loss(p['output_dir'])
+"""
