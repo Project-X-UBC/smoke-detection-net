@@ -93,10 +93,11 @@ class ImageNetEvaluator(DatasetEvaluator):
         plt.ylim([0.0, 1.05])
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
-        plt.title('Receiver operating characteristic example')
+        plt.title('Receiver operating characteristic')
         plt.legend(loc="lower right")
         path = os.path.join(self._output_dir, "roc_curve.png")
         plt.savefig(path)
+        plt.close()
         self._logger.info("Saved ROC plot with file path: %s" % os.path.abspath(path))
 
         # get number of correct samples with threshold == 0.5
