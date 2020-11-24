@@ -16,7 +16,9 @@ from detectron2.data import (
     MetadataCatalog,
     build_detection_test_loader,
     build_detection_train_loader,
+    DatasetMapper,
 )
+import detectron2.data.transforms as T
 from detectron2.engine import default_argument_parser, default_setup, launch
 from detectron2.evaluation import (
     inference_on_dataset,
@@ -33,7 +35,6 @@ from detectron2.utils.events import (
 
 from src.imgcls.config import get_cfg
 import src.imgcls.modeling  # need this import to initialize modeling package
-from src.imgcls.data import DatasetMapper
 from src.imgcls.data.imagenet import register_imagenet_instances
 from src.imgcls.evaluation.imagenet_evaluation import ImageNetEvaluator
 
@@ -42,12 +43,18 @@ logger = logging.getLogger("detectron2")
 
 
 def build_test_loader(cfg, dataset_name):
-    return build_detection_test_loader(cfg, dataset_name, mapper=DatasetMapper(cfg, False))
+    input_size = cfg.MODEL.CLSNET.INPUT_SIZE
+    return build_detection_test_loader(cfg, dataset_name, mapper=DatasetMapper(cfg, is_train=False, 
+                                        augmentations=[T.Resize((input_size, input_size))]))
 
 
 def build_train_loader(cfg):
-    return build_detection_train_loader(cfg, mapper=DatasetMapper(cfg, True))
-
+    input_size = cfg.MODEL.CLSNET.INPUT_SIZE
+    return build_detection_train_loader(cfg, mapper=DatasetMapper(cfg, is_train=True, 
+                                        augmentations=[T.Resize((input_size, input_size)),
+                                                       T.RandomContrast(0.5, 1.5),
+                                                       T.RandomBrightness(0.5, 1.5),
+                                                       T.RandomSaturation(0.5, 1.5)]))
 
 def get_evaluator(cfg, dataset_name, output_folder=None):
     """
