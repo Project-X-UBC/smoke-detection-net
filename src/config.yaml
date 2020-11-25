@@ -4,19 +4,19 @@ DATALOADER:
 DATASETS:
   TEST: ("smokenet_val", )
   TRAIN: ("smokenet_train", )
-DATA_DIR_PATH: /home/rodriguedeschaetzen/smoke-detection-net/data/full
+DATA_DIR_PATH: /home/rodriguedeschaetzen/smoke-detection-net/data/full/frames_100
 EARLY_STOPPING:
   ENABLE: true
   MODE: max
-  MONITOR: accuracy
+  MONITOR: f1-score
   PATIENCE: 10
-EVAL_ONLY: false
+EVAL_ONLY: true
 INPUT:
   CROP:
     ENABLED: false
 MODEL:
   BACKBONE:
-    FREEZE_AT: 0
+    FREEZE_AT: 2
     NAME: build_mnetv1_backbone
   CLSNET:
     ENABLE: true
@@ -26,32 +26,33 @@ MODEL:
   MNET:
     OUT_FEATURES:
     - linear
-    WIDTH_MULT: 0.25
+    WIDTH_MULT: 0.5
   POS_WEIGHT:
-  - 72
+  - 7
+  - 3
+  - 4
+  - 9
+  - 4
+  - 1
+  - 1
+  - 4
+  - 5
+  - 2
+  - 2
+  - 7
+  - 90
   - 32
-  - 34
-  - 67
-  - 43
-  - 11
-  - 13
-  - 39
-  - 51
-  - 22
-  - 23
-  - 67
-  - 636
-  - 223
-  - 224
-  - 507
-  WEIGHTS: ''
-OUTPUT_DIR: /home/rodriguedeschaetzen/smoke-detection-net/output/test_model
+  - 27
+  - 74
+  WEIGHTS: /home/rodriguedeschaetzen/smoke-detection-net/output/real_data_run-2/model_best.pth
+OUTPUT_DIR: /home/rodriguedeschaetzen/smoke-detection-net/output/real_data_run-2
 SEED: 999
 SOLVER:
-  BASE_LR: 0.01
+  BASE_LR: 0.0005
+  CHECKPOINT_PERIOD: 10000
   IMS_PER_BATCH: 16
-  MAX_ITER: 113193
+  MAX_ITER: 143071
   STEPS: (150000, 180000)
 TEST:
-  EVAL_PERIOD: 1131
+  EVAL_PERIOD: 1430
 VERSION: 2
