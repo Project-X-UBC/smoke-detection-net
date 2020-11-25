@@ -114,24 +114,24 @@ def set_params():
         'load_pretrained_weights': True,  # train model with pretrained model weights from file 'model_weights'
         'early_stopping': True,  # option to early stop model training if a certain condition is met
         'early_stopping_monitor': 'f1_score',  # metric to monitor for early stopping
-                                               # current options accuracy, recall, precision, f1_score, roc_auc, val_loss
+                                               # current options: accuracy, recall, precision, f1_score, roc_auc, val_loss
         'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
-        'data_dir': './data/full/frames_100/',
-        'output_dir': './output/resnext-101-proper-lr-test',  # default is ./output/$date_$time if left as empty string
+        'data_dir': './data/full/frames_100',
+        'output_dir': './output/proper-lr-test2',  # default is ./output/$date_$time if left as empty string
         'model_weights': './pretrained_models/X-101-32x8d.pkl',  # path to model weights file for training with pretrained weights
                                                       # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
-        'base_lr': 0.0001,
+        'base_lr': 0.0005,
         'batch_size': 16,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.5,  # adjusts number of channels in each layer by this amount for mobilenetv1
         'num_classes': 16,  # specifies the number of classes + number of nodes in final model layer
         'freeze_at': 2,  # freeze layers of network
-        'decrease_lr_iter': (2000, 20000),  # the iteration number to decrease learning rate by gamma
-        'gamma': 0.01,  # factor to decrease lr by
+        'decrease_lr_iter': (1500, 2000, 10000),  # the iteration number to decrease learning rate by gamma
+        'gamma': 0.1,  # factor to decrease lr by
 
         # misc
         'patience': 10,  # number of val steps where no improvement is made before triggering early stopping
