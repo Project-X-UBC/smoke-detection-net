@@ -147,7 +147,6 @@ def do_train(cfg, model, resume=False):
                     and iteration != max_iter - 1
             ):
                 results = do_test(cfg, model)
-                storage.put_scalars(**results['metrics'])
 
                 if cfg.EARLY_STOPPING.ENABLE:
                     curr = None
@@ -173,6 +172,8 @@ def do_train(cfg, model, resume=False):
                         es_count += 1
 
                 comm.synchronize()
+                if comm.is_main_process():
+                    storage.put_scalars(**results['metrics'])
 
             if iteration - start_iter > 5 and (
                     (iteration + 1) % 20 == 0 or iteration == max_iter - 1
@@ -248,8 +249,7 @@ def run(args):
             model, device_ids=[comm.get_local_rank()], broadcast_buffers=False
         )
 
-    do_train(cfg, model, resume=args.resume)
-    return do_test(cfg, model)
+    return do_train(cfg, model, resume=args.resume)
 
 
 def main(num_gpus=1, config_file="src/config.yaml", resume=False):

@@ -118,17 +118,17 @@ def set_params():
         'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
-        'data_dir': './data/full/frames_100',
-        'output_dir': './output/proper-lr-test2',  # default is ./output/$date_$time if left as empty string
+        'data_dir': './data/full/frames_100_bk',
+        'output_dir': './output/X-101-grid-2-thres-0.1',  # default is ./output/$date_$time if left as empty string
         'model_weights': './pretrained_models/X-101-32x8d.pkl',  # path to model weights file for training with pretrained weights
                                                       # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
-        'base_lr': 0.0005,
+        'base_lr': 0.0001,
         'batch_size': 16,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.5,  # adjusts number of channels in each layer by this amount for mobilenetv1
-        'num_classes': 16,  # specifies the number of classes + number of nodes in final model layer
+        'num_classes': 4,  # specifies the number of classes + number of nodes in final model layer
         'freeze_at': 2,  # freeze layers of network
         'decrease_lr_iter': (1500, 2000, 10000),  # the iteration number to decrease learning rate by gamma
         'gamma': 0.1,  # factor to decrease lr by
