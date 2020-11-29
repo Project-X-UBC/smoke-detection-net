@@ -1,5 +1,6 @@
 import cv2
 from os import listdir
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import xml.etree.ElementTree as ET
@@ -9,14 +10,24 @@ import json
 import time
 import re
 import sys
+import argparse
 
 GRID_SIZE = 4
-OVERLAP_THRESHOLD = 1 # Percentage of a grid square needed to be filled to be a 1
+OVERLAP_THRESHOLD = 0.9 # Percentage of a grid square needed to be filled to be a 1
 API_URL = 'http://216.232.184.219/api/v1'
 LABEL_FILENAME = '../../datasets/labels.json'
 VIDEO_FOLDER = '../../datasets/alert_wildfire/raw_data'
 FRAMES_FOLDER = 'alert_wildfire_frames'
 API_KEY = None
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Make labels")
+    parser.add_argument('--source', type=str, help="server if you want to fetch annotations from CVAT server\nlocal if you have a local labels.json already\nmankind if you want to label the mankind dataset", required=True)
+    parser.add_argument('--gridsize', type=int, help="Size of the label grid", required=False)
+    parser.add_argument('--threshold', type=float, help="Threshold for label calculation", required=False)
+    args = parser.parse_args()
+    return args
 
 
 def overlap_area_percentage(tl1, br1, tl2, br2):
@@ -28,7 +39,7 @@ def overlap_area_percentage(tl1, br1, tl2, br2):
     return overlap_area / grid_area
     
 
-def box_to_grid_vector(tl, br, width, height, grid_size=GRID_SIZE):
+def box_to_grid_vector(tl, br, width, height, grid_size=GRID_SIZE, threshold=OVERLAP_THRESHOLD):
     grid_vector, overlap_areas = [], []
     grid_w, grid_h = width/grid_size, height/grid_size
     for i in range(grid_size):
@@ -38,7 +49,7 @@ def box_to_grid_vector(tl, br, width, height, grid_size=GRID_SIZE):
             grid_tl = (grid_w*j, grid_h*i)
             grid_br = (grid_w*(j+1), grid_h*(i+1))
             overlap_areas[i].append(overlap_area_percentage(tl, br, grid_tl, grid_br))
-            if overlap_areas[i][j] > OVERLAP_THRESHOLD:
+            if overlap_areas[i][j] >= threshold:
                 grid_vector[i].append(1)
             else:
                 grid_vector[i].append(0)
@@ -212,7 +223,12 @@ def main_cvat_to_grid_server():
             sys.exit(0)
 
 
-def main_cvat_to_grid_local(grid_size=GRID_SIZE):
+def main_cvat_to_grid_local(grid_size=GRID_SIZE, threshold=OVERLAP_THRESHOLD):
+    print(f'Making label of gridsize {grid_size} and threshold {threshold}')
+    if grid_size is None:
+        grid_size = GRID_SIZE
+    if threshold is None:
+        threshold = OVERLAP_THRESHOLD
     with open(LABEL_FILENAME, 'rb') as label_file:
         label_json = json.load(label_file)
     boxes = label_json['cvat_boxes']
@@ -227,10 +243,10 @@ def main_cvat_to_grid_local(grid_size=GRID_SIZE):
             if framename in boxes:
                 for box in boxes[framename]:
                     tl, br = box[0], box[1]
-                    grid_vector = grid_vector | box_to_grid_vector(tl, br, width, height, grid_size)
+                    grid_vector = grid_vector | box_to_grid_vector(tl, br, width, height, grid_size, threshold)
             new_labels[framename] = grid_vector.flatten().tolist()
     new_label_json = {'labels': new_labels, 'videonames': videonames, 'cvat_boxes': boxes}
-    with open(f'../data/full/labels_{grid_size}.json', 'w') as f:
+    with open(f'../data/full/labels_{grid_size}_{threshold}.json', 'w') as f:
         json.dump(new_label_json, f)
 
 
@@ -252,11 +268,10 @@ def main_mankind_to_grid(grid_size=GRID_SIZE):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('Options:\nserver if you want to fetch annotations from CVAT server\nlocal if you have a local labels.json already')
-    elif sys.argv[1] == 'server':
+    args = parse_args()
+    if args.source == 'server':
         main_cvat_to_grid_server()
-    elif sys.argv[1] == 'local':
-        main_cvat_to_grid_local(int(sys.argv[2]))
-    elif sys.argv[1] == 'mankind':
+    elif args.source == 'local':
+        main_cvat_to_grid_local(args.gridsize, args.threshold)
+    elif args.source == 'mankind':
         main_mankind_to_grid(int(sys.argv[2]))
