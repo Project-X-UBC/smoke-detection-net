@@ -1,50 +1,59 @@
-# description of entire config https://detectron2.readthedocs.io/modules/config.html#config-references
+DATALOADER:
+  ASPECT_RATIO_GROUPING: false
+  NUM_WORKERS: 4
+DATASETS:
+  TEST: ("smokenet_val", )
+  TRAIN: ("smokenet_train", )
+DATA_DIR_PATH: /home/rodriguedeschaetzen/smoke-detection-net/data/full/frames_100_bk
+EARLY_STOPPING:
+  ENABLE: true
+  MODE: max
+  MONITOR: f1_score
+  PATIENCE: 10
+EVAL_ONLY: false
+INPUT:
+  CROP:
+    ENABLED: false
 MODEL:
-  META_ARCHITECTURE: "ClsNet"
-  POS_WEIGHT: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   BACKBONE:
-    NAME: "build_resnet_cls_backbone" # Resnet/Resnext backbone
-    FREEZE_AT: 2 # freezing a layer means setting the requires_grad to False
-  MNET: # not used by resnet
+    FREEZE_AT: 2
+    NAME: build_resnet_cls_backbone
+  CLSNET:
+    ENABLE: true
+    INPUT_SIZE: 224
+    NUM_CLASSES: 4
+  META_ARCHITECTURE: ClsNet
+  MNET:
     OUT_FEATURES:
     - linear
-    WIDTH_MULT: 0.25
-  CLSNET:
-    ENABLE: True
-    NUM_CLASSES: 16
-    INPUT_SIZE: 224 # resizes image to 224x224
-  WEIGHTS: "detectron2://ImageNetPretrained/20171220/X-101-32x8d.pkl"
-  # description here https://github.com/facebookresearch/detectron2/blob/master/detectron2/checkpoint/catalog.py
+    WIDTH_MULT: 0.5
+  POS_WEIGHT:
+  - 1
+  - 1
+  - 3
+  - 3
   RESNETS:
     DEPTH: 101
     NORM: FrozenBN
     NUM_GROUPS: 32
-    WIDTH_PER_GROUP: 8
-    STRIDE_IN_1X1: False
     OUT_FEATURES:
     - linear
-
-DATASETS:
-  TRAIN: ("smokenet_train", )
-  TEST: ("smokenet_val", )
-DATALOADER:
-  ASPECT_RATIO_GROUPING: False # whether to group images with similar aspect ratio for efficiency
-  NUM_WORKERS: 4 # number of parallel data loading workers
+    STRIDE_IN_1X1: false
+    WIDTH_PER_GROUP: 8
+  WEIGHTS: /home/rodriguedeschaetzen/smoke-detection-net/pretrained_models/X-101-32x8d.pkl
+OUTPUT_DIR: /home/rodriguedeschaetzen/smoke-detection-net/output/X-101-grid-2-thres-0.1
+SEED: 999
 SOLVER:
-  IMS_PER_BATCH: 64
-  BASE_LR: 0.1
-  STEPS: (150000, 180000) # The iteration number to decrease learning rate by GAMMA
-  MAX_ITER: 20 # maximum number of iterations
-INPUT:
-  CROP:
-    ENABLED: False
+  BASE_LR: 0.0001
+  CHECKPOINT_PERIOD: 10000
+  GAMMA: 0.1
+  IMS_PER_BATCH: 16
+  MAX_ITER: 143703
+  STEPS: !!python/tuple
+  - 1500
+  - 2000
+  - 10000
+  WARMUP_ITERS: 1000
 TEST:
-  EVAL_PERIOD: 0 # the period to evaluate the model during training, 0 means disable
-
-EARLY_STOPPING:
-  ENABLE: True
-  MONITOR: "validation_loss"
-  PATIENCE: 10
-  MODE: "min"
-
+  EVAL_PERIOD: 718
 VERSION: 2

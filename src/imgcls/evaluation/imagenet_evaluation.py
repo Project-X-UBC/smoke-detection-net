@@ -55,6 +55,8 @@ class ImageNetEvaluator(DatasetEvaluator):
                 "[ImageNetEvaluator] Did not receive valid predictions.")
             return {}
 
+        running_loss = 0.0
+        criterion = nn.BCELoss()
         target = []
         pred = []
         file_path = []
@@ -65,6 +67,10 @@ class ImageNetEvaluator(DatasetEvaluator):
             file_path.append(p["file_path"])
             image_id.append(p["image_id"])
 
+            loss = criterion(p["pred"], torch.as_tensor(p["label"], dtype=torch.float))
+            running_loss += loss.item()
+
+        val_loss = running_loss / len(pred)
         pred = torch.stack(pred, dim=0)
         target = torch.as_tensor(target, dtype=pred.dtype)
 
@@ -144,8 +150,9 @@ class ImageNetEvaluator(DatasetEvaluator):
         self._logger.info("Precision %.4f" % precision)
         self._logger.info("F1-score %.4f" % f1_score)
         self._logger.info("ROC AUC %.4f" % roc_auc)
+        self._logger.info("Validation loss %.4f" % val_loss)
 
         result = OrderedDict(metrics={"accuracy": accuracy.item(), "recall": recall,
-                                      "precision": precision, "f1-score": f1_score,
-                                      "roc-auc": roc_auc})
+                                      "precision": precision, "f1_score": f1_score,
+                                      "roc_auc": roc_auc, "val_loss": val_loss})
         return result

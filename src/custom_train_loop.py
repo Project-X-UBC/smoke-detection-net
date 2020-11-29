@@ -83,21 +83,6 @@ def do_test(cfg, model):
     return results
 
 
-def compute_val_loss(cfg, model):
-    data_loader = build_test_loader(cfg, cfg.DATASETS.TEST[0])  # only compute loss on first test dataset
-    running_loss = 0.0
-    model.eval()
-    criterion = nn.BCELoss()
-    with torch.no_grad():
-        for idx, data in enumerate(data_loader):
-            result = model(data)
-            target = torch.as_tensor(data[0]['label'], dtype=torch.float).to(model.device)
-            loss = criterion(result[0]["pred"], target)
-            running_loss += loss.item()
-    model.train()
-    return running_loss / len(data_loader)
-
-
 def get_es_result(mode, current, best_so_far):
     """Returns true if monitored metric has been improved"""
     if mode == 'max':
@@ -139,11 +124,7 @@ def do_train(cfg, model, resume=False):
     # init early stopping count
     es_count = 0
 
-    # init val loss
-    val_loss = compute_val_loss(cfg, model)
-
-    # compared to "train_net.py", we do not support accurate timing and
-    # precise BN here, because they are not trivial to implement in a small training loop
+    # get train data loader
     data_loader = build_train_loader(cfg)
     logger.info("Starting training from iteration {}".format(start_iter))
     with EventStorage(start_iter) as storage:
@@ -152,7 +133,7 @@ def do_train(cfg, model, resume=False):
 
             _, losses, losses_reduced = get_loss(data, model)
             if comm.is_main_process():
-                storage.put_scalars(total_loss=losses_reduced, validation_loss=val_loss)
+                storage.put_scalars(total_loss=losses_reduced)
 
             optimizer.zero_grad()
             losses.backward()
@@ -166,15 +147,11 @@ def do_train(cfg, model, resume=False):
                     and iteration != max_iter - 1
             ):
                 results = do_test(cfg, model)
-                storage.put_scalars(**results['metrics'])
-                val_loss = compute_val_loss(cfg, model)
 
                 if cfg.EARLY_STOPPING.ENABLE:
                     curr = None
                     if cfg.EARLY_STOPPING.MONITOR in results['metrics'].keys():
                         curr = results['metrics'][cfg.EARLY_STOPPING.MONITOR]
-                    elif cfg.EARLY_STOPPING.MONITOR == 'validation_loss':
-                        curr = val_loss
 
                     if curr is None:
                         logger.warning("Early stopping enabled but cannot find metric: %s" %
@@ -188,14 +165,15 @@ def do_train(cfg, model, resume=False):
                         logger.info("Best metric %s improved to %0.4f" %
                                     (cfg.EARLY_STOPPING.MONITOR, curr))
                         # update best model
-                        periodic_checkpointer.save(name="model_best",
-                                                   **{**results['metrics'], 'validation_loss': val_loss})
+                        periodic_checkpointer.save(name="model_best", **{**results['metrics']})
                     else:
                         logger.info("Early stopping metric %s did not improve, current %.04f, best %.04f" %
                                     (cfg.EARLY_STOPPING.MONITOR, curr, best_monitor_metric))
                         es_count += 1
 
                 comm.synchronize()
+                if comm.is_main_process():
+                    storage.put_scalars(**results['metrics'])
 
             if iteration - start_iter > 5 and (
                     (iteration + 1) % 20 == 0 or iteration == max_iter - 1
@@ -271,8 +249,7 @@ def run(args):
             model, device_ids=[comm.get_local_rank()], broadcast_buffers=False
         )
 
-    do_train(cfg, model, resume=args.resume)
-    return do_test(cfg, model)
+    return do_train(cfg, model, resume=args.resume)
 
 
 def main(num_gpus=1, config_file="src/config.yaml", resume=False):
