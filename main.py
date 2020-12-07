@@ -124,13 +124,13 @@ def set_params():
                                                                  # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
-        'base_lr': 0.0001,
+        'base_lr': 0.00001,
         'batch_size': 16,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
         'base_multiplier': 0.5,  # adjusts number of channels in each layer by this amount for mobilenetV1
-        'num_classes': 4,  # specifies the number of classes + number of nodes in final model layer
+        'num_classes': 16,  # specifies the number of classes + number of nodes in final model layer
         'freeze_at': 2,  # freeze layers of network, note this is not implemented for all backbones
-        'decrease_lr_iter': (1500, 2000, 10000),  # the iteration number to decrease learning rate by gamma
+        'decrease_lr_iter': (2000, 10000),  # the iteration number to decrease learning rate by gamma
         'gamma': 0.1,  # factor to decrease lr by
 
         # misc
