@@ -3,6 +3,7 @@
 # original code from https://github.com/facebookresearch/detectron2/blob/master/tools/plain_train_net.py
 import logging
 import os
+import json
 import numpy as np
 from collections import OrderedDict
 import torch
@@ -100,7 +101,7 @@ def do_train(cfg, model, resume=False):
         model, cfg.OUTPUT_DIR, optimizer=optimizer, scheduler=scheduler
     )
     start_iter = (
-            checkpointer.resume_or_load(cfg.MODEL.WEIGHTS, resume=resume).get("iteration", -1) + 1
+            checkpointer.resume_or_load(cfg.MODEL.WEIGHTS, resume=resume).get("iteration", -1) + 1  # TODO: bug here
     )
     max_iter = cfg.SOLVER.MAX_ITER
 
@@ -147,6 +148,7 @@ def do_train(cfg, model, resume=False):
                     and iteration != max_iter - 1
             ):
                 results = do_test(cfg, model)
+                storage.put_scalars(**results['metrics'])
 
                 if cfg.EARLY_STOPPING.ENABLE:
                     curr = None
@@ -166,14 +168,17 @@ def do_train(cfg, model, resume=False):
                                     (cfg.EARLY_STOPPING.MONITOR, curr))
                         # update best model
                         periodic_checkpointer.save(name="model_best", **{**results['metrics']})
+                        # save best metrics to a .txt file
+                        with open(os.path.join(cfg.OUTPUT_DIR, 'best_metrics.txt'), 'w') as f:
+                            json.dump(results['metrics'], f)
                     else:
                         logger.info("Early stopping metric %s did not improve, current %.04f, best %.04f" %
                                     (cfg.EARLY_STOPPING.MONITOR, curr, best_monitor_metric))
                         es_count += 1
 
+                storage.put_scalar('val_loss', results['metrics']['val_loss'])
+
                 comm.synchronize()
-                if comm.is_main_process():
-                    storage.put_scalars(**results['metrics'])
 
             if iteration - start_iter > 5 and (
                     (iteration + 1) % 20 == 0 or iteration == max_iter - 1

@@ -5,10 +5,10 @@ import numpy as np
 from sklearn.model_selection import GroupShuffleSplit
 import argparse
 
-RANDOM_SEED = 24
-TEST_SIZE = .1
-VALIDATION_SIZE = .1
-DATA_FOLDER = os.path.abspath('../../data/full/frames_100_bk')
+RANDOM_SEED = 42
+TEST_SIZE = .2
+VALIDATION_SIZE = .25
+DATA_FOLDER = os.path.abspath('../../data/full/frames_100_final')
 
 
 def parse_args():
@@ -57,7 +57,7 @@ def split_files(dataset_dicts, image_root):
 
 def accumulate_real_data_json(image_root, grid_size):
     print('Accumulating the JSON...')
-    json_filename = os.path.join(image_root, 'labels_2_0.1.json')
+    json_filename = os.path.join(image_root, 'labels.json')
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
     filenames = np.array(os.listdir(os.path.join(image_root, 'frames')))
