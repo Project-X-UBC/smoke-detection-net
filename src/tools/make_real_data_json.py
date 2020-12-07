@@ -110,7 +110,6 @@ def make_real_data_main(args):
             json.dump(mankind_set, w_obj)
         return
     dataset_dicts = accumulate_real_data_json(args.path, args.gridsize)
-    #split_files(dataset_dicts)
     # Accumulate val
     # Save
     print('Saving the JSON files...')

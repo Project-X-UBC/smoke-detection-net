@@ -1,4 +1,7 @@
-# original code from https://github.com/pytorch/vision/blob/master/torchvision/models/mobilenet.py
+"""
+    MobileNetV2 backbone
+    Original file from https://github.com/pytorch/vision/blob/master/torchvision/models/mobilenet.py
+"""
 import torch
 from torch import nn
 from torch import Tensor
@@ -7,10 +10,10 @@ from detectron2.layers import Conv2d, ShapeSpec
 from detectron2.modeling.backbone import Backbone
 from detectron2.modeling.backbone.build import BACKBONE_REGISTRY
 
-
 __all__ = [
     'build_mnetv2_backbone',
 ]
+
 
 def _make_divisible(v: float, divisor: int, min_value: Optional[int] = None) -> int:
     """
@@ -34,13 +37,13 @@ def _make_divisible(v: float, divisor: int, min_value: Optional[int] = None) -> 
 
 class ConvBNReLU(nn.Sequential):
     def __init__(
-        self,
-        in_planes: int,
-        out_planes: int,
-        kernel_size: int = 3,
-        stride: int = 1,
-        groups: int = 1,
-        norm_layer: Optional[Callable[..., nn.Module]] = None
+            self,
+            in_planes: int,
+            out_planes: int,
+            kernel_size: int = 3,
+            stride: int = 1,
+            groups: int = 1,
+            norm_layer: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         padding = (kernel_size - 1) // 2
         if norm_layer is None:
@@ -54,12 +57,12 @@ class ConvBNReLU(nn.Sequential):
 
 class InvertedResidual(nn.Module):
     def __init__(
-        self,
-        inp: int,
-        oup: int,
-        stride: int,
-        expand_ratio: int,
-        norm_layer: Optional[Callable[..., nn.Module]] = None
+            self,
+            inp: int,
+            oup: int,
+            stride: int,
+            expand_ratio: int,
+            norm_layer: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InvertedResidual, self).__init__()
         self.stride = stride
@@ -93,10 +96,10 @@ class InvertedResidual(nn.Module):
 
 class MobileNetV2(Backbone):
     def __init__(
-        self,
-        num_classes: int = 1000,
-        width_mult: float = 1.0,
-        round_nearest: int = 8,
+            self,
+            num_classes: int = 1000,
+            width_mult: float = 1.0,
+            round_nearest: int = 8,
     ) -> None:
         """
         MobileNet V2 main class

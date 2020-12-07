@@ -31,11 +31,5 @@ python -m detectron2.utils.collect_env
 conda env update --name projectx --file ../env.yml
 
 # create metadata jsons for the mini dataset
-./generate_metadata_jsons.sh data/mini
-
-# download fake data?
-echo ""
-read -p "Download fake_data.zip (y/n)?: " input
-if [[ $input == "y" ]]; then
-  ./download_fake_data.sh
-fi
+cd ../src/tools
+python make_real_data_json.py --path ../../data/mini
