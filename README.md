@@ -8,7 +8,7 @@ In this work we present a multi-label image classifier for a smoke-detection tas
 Our approach is to divide the image into a KxK grid and predict the cells of the grid containing smoke.
 We achieve 3 − 4% improvement over baseline for a 4x4 mesh and empirically establish upper bounds on grid size resolution.
 As a secondary contribution, we release the first smoke-annotated video dataset which consists of 139 hours of footage 
-from PTZ cameras across 678 videos. 
+from Pan-Tilt-Zoom cameras across 678 videos. 
 
 ![alt-text-2](figures/im1_gr_2.png "mesh-size-2x2") ![alt-text-3](figures/im1_gr_4.png "mesh-size-4x4") ![alt-text-4](figures/im1_gr_8.png "mesh-size-8x8")
 
