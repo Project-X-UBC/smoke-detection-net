@@ -1,3 +1,8 @@
+"""
+    MobileNetV1 backbone
+    Original file from https://github.com/tkianai/ImageClassification.detectron2
+"""
+
 import torch
 import torch.nn as nn
 from detectron2.layers import Conv2d, ShapeSpec

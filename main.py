@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import torch
 import random
-from scripts.plot_loss import plot_loss
+from scripts.utils import plot_loss
 
 
 def seed_all(seed):
@@ -99,11 +99,11 @@ def set_params():
     """
     params = {
         # configuration file
-        'config': 'src/config_resnext.yaml',  # 'src/config_resnet.yaml' to load pretrained resnet model
+        'config': 'src/imgcls/config/config.yaml',  # 'src/config_resnet.yaml' to load pretrained resnet model
 
         # architecture
         'backbone': 'build_resnet_cls_backbone',  # select model backbone
-                                              # custom backbones are in src/imgcls/modeling/backbone
+                                                  # custom backbones are in src/imgcls/modeling/backbone
 
         # compute settings
         'num_gpus': 1,  # number of gpus, can check with `nvidia-smi`
@@ -121,13 +121,13 @@ def set_params():
         'data_dir': './data/full/frames_100_bk',
         'output_dir': './output/X-101-grid-2-thres-0.1',  # default is ./output/$date_$time if left as empty string
         'model_weights': './pretrained_models/X-101-32x8d.pkl',  # path to model weights file for training with pretrained weights
-                                                      # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
+                                                                 # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
         'base_lr': 0.0001,
         'batch_size': 16,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
-        'base_multiplier': 0.5,  # adjusts number of channels in each layer by this amount for mobilenetv1
+        'base_multiplier': 0.5,  # adjusts number of channels in each layer by this amount for mobilenet
         'num_classes': 4,  # specifies the number of classes + number of nodes in final model layer
         'freeze_at': 2,  # freeze layers of network
         'decrease_lr_iter': (1500, 2000, 10000),  # the iteration number to decrease learning rate by gamma

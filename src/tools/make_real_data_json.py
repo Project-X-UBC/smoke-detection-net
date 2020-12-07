@@ -8,7 +8,7 @@ import argparse
 RANDOM_SEED = 24
 TEST_SIZE = .1
 VALIDATION_SIZE = .1
-DATA_FOLDER = os.path.abspath('../../data/full/frames_100_bk')
+DATA_FOLDER = os.path.abspath('../../data/mini/')
 
 
 def parse_args():
@@ -57,7 +57,7 @@ def split_files(dataset_dicts, image_root):
 
 def accumulate_real_data_json(image_root, grid_size):
     print('Accumulating the JSON...')
-    json_filename = os.path.join(image_root, 'labels_2_0.1.json')
+    json_filename = os.path.join(image_root, 'labels.json')
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
     filenames = np.array(os.listdir(os.path.join(image_root, 'frames')))
@@ -110,7 +110,6 @@ def make_real_data_main(args):
             json.dump(mankind_set, w_obj)
         return
     dataset_dicts = accumulate_real_data_json(args.path, args.gridsize)
-    #split_files(dataset_dicts)
     # Accumulate val
     # Save
     print('Saving the JSON files...')

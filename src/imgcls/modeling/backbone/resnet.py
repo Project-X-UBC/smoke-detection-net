@@ -1,3 +1,8 @@
+"""
+    ResNet backbone
+    Original code from https://github.com/facebookresearch/detectron2/blob/6df2375535c458ad10aec2c16f2c81e1c29dd8a3/detectron2/modeling/backbone/resnet.py#L561
+"""
+
 from detectron2.layers import ShapeSpec
 from detectron2.modeling.backbone.build import BACKBONE_REGISTRY
 from detectron2.modeling.backbone.resnet import ResNet, BasicStem, BasicBlock, DeformBottleneckBlock, BottleneckBlock
@@ -9,8 +14,6 @@ __all__ = [
 
 @BACKBONE_REGISTRY.register()
 def build_resnet_cls_backbone(cfg, input_shape: ShapeSpec):
-    # original file from
-    # https://github.com/facebookresearch/detectron2/blob/6df2375535c458ad10aec2c16f2c81e1c29dd8a3/detectron2/modeling/backbone/resnet.py#L561
     """
     Create a ResNet instance for classification task from config.
 
