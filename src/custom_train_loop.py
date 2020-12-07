@@ -101,7 +101,7 @@ def do_train(cfg, model, resume=False):
         model, cfg.OUTPUT_DIR, optimizer=optimizer, scheduler=scheduler
     )
     start_iter = (
-            checkpointer.resume_or_load(cfg.MODEL.WEIGHTS, resume=resume).get("iteration", -1) + 1  # TODO: bug here
+            checkpointer.resume_or_load(cfg.MODEL.WEIGHTS, resume=resume).get("iteration", -1) + 1  #FIXME: does not continue from iteration # when resume=True
     )
     max_iter = cfg.SOLVER.MAX_ITER
 
@@ -158,6 +158,8 @@ def do_train(cfg, model, resume=False):
                     if curr is None:
                         logger.warning("Early stopping enabled but cannot find metric: %s" %
                                        cfg.EARLY_STOPPING.MONITOR)
+                        logger.warning("Options for monitored metrics are: [%s]" %
+                                       ", ".join(map(str, results['metrics'].keys())))
                     elif best_monitor_metric is None:
                         best_monitor_metric = curr
                     elif get_es_result(cfg.EARLY_STOPPING.MODE,

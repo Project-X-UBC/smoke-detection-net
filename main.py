@@ -114,7 +114,7 @@ def set_params():
         'load_pretrained_weights': True,  # train model with pretrained model weights from file 'model_weights'
         'early_stopping': True,  # option to early stop model training if a certain condition is met
         'early_stopping_monitor': 'f1_score',  # metric to monitor for early stopping
-                                               # current options: accuracy, recall, precision, f1_score, roc_auc, val_loss
+                                               # current options: accuracy, recall, precision, f1_score, roc_auc, val_loss, mcc
         'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
