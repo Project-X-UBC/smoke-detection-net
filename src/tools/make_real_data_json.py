@@ -8,7 +8,7 @@ import argparse
 RANDOM_SEED = 42
 TEST_SIZE = .2
 VALIDATION_SIZE = .25
-DATA_FOLDER = os.path.abspath('../../data/full')
+DATA_FOLDER = os.path.abspath('../../data/full/frames_100_final')
 
 
 def parse_args():
@@ -16,7 +16,6 @@ def parse_args():
     parser.add_argument('--path', type=str, help="Path of the directory containing the image data", required=False)
     parser.add_argument('--gridsize', type=int, help="Size of the label grid", required=False)
     parser.add_argument('--mankind', type=str, help="Use if you want AI for Mankind. --mankind val or --mankind test, depending on which set you want it for.")
-    parser.add_argument('--labelpath', type=str, help="Path of the Label file. Optional", required=False)
     args = parser.parse_args()
     if args.path is not None:
         args.path = os.path.abspath(args.path)
@@ -56,37 +55,40 @@ def split_files(dataset_dicts, image_root):
             os.rename(f'{image_root}/frames/{filename}', f'{image_root}/{phase}/{filename}')
 
 
-def accumulate_real_data_json(image_root, grid_size, labelpath=None):
+def accumulate_real_data_json(image_root, grid_size):
     print('Accumulating the JSON...')
-    json_filename = os.path.join(image_root, '../', f'labels_{grid_size}.json') if labelpath is None else labelpath
+    json_filename = os.path.join(image_root, 'labels.json')
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
-    filenames = np.array(os.listdir(image_root))
+    filenames = np.array(os.listdir(os.path.join(image_root, 'frames')))
     phases = train_test_val_split(filenames)
     dataset_dicts = {'train': [], 'test': [], 'val': []}
+    missing = 0
     for phase in phases:
         for filename in tqdm(phases[phase]):
             if filename not in labels:
+                missing += 1
                 continue
             record = {
-                'file_name': os.path.abspath(os.path.join(image_root, str(filename))),
+                'file_name': os.path.abspath(os.path.join(image_root, 'frames', str(filename))),
                 'image_id' : int(np.where(filenames == filename)[0]),
                 'label'    : labels[filename]
             }
             dataset_dicts[phase].append(record)
+    print("total missing: " + str(missing))
     return dataset_dicts
 
 
 def make_mankind_set(args):
     # Call this once you already have a split but want to use AI for Mankind's set instead of your val or test set
-    json_filename = os.path.join(args.path, f'labels_mankind_{args.gridsize}.json')
+    json_filename = os.path.join(args.path, f'labels.json')
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
-    filenames = os.listdir(os.path.join(args.path, 'mankind'))
+    filenames = os.listdir(os.path.join(args.path, 'frames'))
     dataset = []
     for filename in filenames:
         record = {
-            'file_name': os.path.abspath(os.path.join(args.path, 'mankind', filename)),
+            'file_name': os.path.abspath(os.path.join(args.path, 'frames', filename)),
             'image_id' : len(dataset),
             'label'    : labels[filename]
         }
@@ -107,8 +109,7 @@ def make_real_data_main(args):
         with open(os.path.join(args.path, f"{args.mankind}.json"), "w") as w_obj:
             json.dump(mankind_set, w_obj)
         return
-    dataset_dicts = accumulate_real_data_json(args.path, args.gridsize, args.labelpath)
-    #split_files(dataset_dicts)
+    dataset_dicts = accumulate_real_data_json(args.path, args.gridsize)
     # Accumulate val
     # Save
     print('Saving the JSON files...')

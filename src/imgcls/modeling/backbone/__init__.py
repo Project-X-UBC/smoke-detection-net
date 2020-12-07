@@ -1,4 +1,5 @@
-from .mobilenet import *
+from .mobilenetv1 import *
+from .mobilenetv2 import *
 from .resnet import *
 from .inceptionv3 import *
 

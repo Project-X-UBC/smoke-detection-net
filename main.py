@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import torch
 import random
-from scripts.plot_loss import plot_loss
+from scripts.utils import plot_loss
 
 
 def seed_all(seed):
@@ -59,6 +59,8 @@ def update_config(params, config_file='src/config.yaml'):
     cfg['SOLVER']['IMS_PER_BATCH'] = params['batch_size']
     cfg['SOLVER']['MAX_ITER'] = compute_max_iter(len(train_json), params['batch_size'], params['num_epochs'])
     cfg['SOLVER']['CHECKPOINT_PERIOD'] = params['checkpoint_period']
+    cfg['SOLVER']['STEPS'] = params['decrease_lr_iter']
+    cfg['SOLVER']['GAMMA'] = params['gamma']
     cfg['MODEL']['CLSNET']['INPUT_SIZE'] = params['input_size']
     cfg['MODEL']['CLSNET']['NUM_CLASSES'] = params['num_classes']
     cfg['MODEL']['MNET']['WIDTH_MULT'] = params['base_multiplier']
@@ -97,11 +99,11 @@ def set_params():
     """
     params = {
         # configuration file
-        'config': 'src/config.yaml',  # 'src/config_resnet.yaml' to load pretrained resnet model
+        'config': 'src/imgcls/config/config_resnet.yaml',  # other available config files are 'config_resnext.yaml' and 'config.yaml'
 
         # architecture
-        'backbone': 'build_mnetv1_backbone',  # select model backbone
-                                              # custom backbones are in src/imgcls/modeling/backbone
+        'backbone': 'build_resnet_cls_backbone',  # select model backbone
+                                                  # custom backbones are in src/imgcls/modeling/backbone
 
         # compute settings
         'num_gpus': 1,  # number of gpus, can check with `nvidia-smi`
@@ -109,29 +111,32 @@ def set_params():
         # pipeline modes
         'eval_only_mode': False,  # evaluate model on test data, if true 'model_weights' param needs to be set
         'resume': False,  # resume training from last checkpoint in 'output_dir', useful when training was interrupted
-        'load_pretrained_weights': False,  # train model with pretrained model weights from file 'model_weights'
+        'load_pretrained_weights': True,  # train model with pretrained model weights from file 'model_weights'
         'early_stopping': True,  # option to early stop model training if a certain condition is met
-        'early_stopping_monitor': 'f1-score',  # metric to monitor for early stopping e.g. validation_loss, accuracy...
+        'early_stopping_monitor': 'f1_score',  # metric to monitor for early stopping
+                                               # current options: accuracy, recall, precision, f1_score, roc_auc, val_loss, mcc
         'early_stopping_mode': 'max',  # the objective of the 'early_stopping_monitor' metric, e.g. 'min' for loss
 
         # paths
-        'data_dir': './data/full',
-        'output_dir': './output/test_model',  # default is ./output/$date_$time if left as empty string
-        'model_weights': './output/model_final.pth',  # path to model weights file for training with pretrained weights
-                                                      # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
+        'data_dir': './data/full/frames_100',
+        'output_dir': './output/resnet-50',  # default is ./output/$date_$time if left as empty string
+        'model_weights': 'detectron2://ImageNetPretrained/MSRA/R-50.pkl',  # path to model weights file for training with pretrained weights
+                                                                 # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
-        'base_lr': 0.01,
+        'base_lr': 0.0001,
         'batch_size': 16,
         'input_size': 224,  # resizes images to input_size x input_size e.g. 224x224
-        'base_multiplier': 0.25,  # adjusts number of channels in each layer by this amount
-        'num_classes': 16,  # specifies the number of classes + number of nodes in final model layer
-        'freeze_at': 1,  # freeze layers of network
+        'base_multiplier': 0.5,  # adjusts number of channels in each layer by this amount for mobilenetV1
+        'num_classes': 4,  # specifies the number of classes + number of nodes in final model layer
+        'freeze_at': 2,  # freeze layers of network, note this is not implemented for all backbones
+        'decrease_lr_iter': (1500, 2000, 10000),  # the iteration number to decrease learning rate by gamma
+        'gamma': 0.1,  # factor to decrease lr by
 
         # misc
         'patience': 10,  # number of val steps where no improvement is made before triggering early stopping
-        'num_epochs': 50,  # total number of epochs, can be < 1
-        'num_validation_steps': 100,  # number of evaluations on the validation set during training
+        'num_epochs': 20,  # total number of epochs, can be < 1
+        'num_validation_steps': 200,  # number of evaluations on the validation set during training
         'checkpoint_period': 10000,  # save a checkpoint after every this number of iterations
         'num_workers': 4,  # number of data loading threads
         'seed': 999  # seed so computations are deterministic
