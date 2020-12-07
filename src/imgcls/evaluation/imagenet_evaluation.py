@@ -6,7 +6,7 @@ from collections import OrderedDict
 import torch
 from torch import nn
 from fvcore.common.file_io import PathManager
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, matthews_corrcoef
 
 import detectron2.utils.comm as comm
 from detectron2.data import MetadataCatalog
@@ -110,6 +110,9 @@ class ImageNetEvaluator(DatasetEvaluator):
         pred = pred.round()
         correct = pred.eq(target)
 
+        # compute Matthews correlation coefficient (MCC)
+        mcc = matthews_corrcoef(target, pred)
+
         # FIXME naive metrics
         accuracy = correct.sum().true_divide(torch.tensor(correct.size(0)))
         confusion_vector = (pred // target)
@@ -149,10 +152,13 @@ class ImageNetEvaluator(DatasetEvaluator):
         self._logger.info("Recall %.4f" % recall)
         self._logger.info("Precision %.4f" % precision)
         self._logger.info("F1-score %.4f" % f1_score)
+        self._logger.info("MCC %.4f" % mcc)
         self._logger.info("ROC AUC %.4f" % roc_auc)
         self._logger.info("Validation loss %.4f" % val_loss)
 
-        result = OrderedDict(metrics={"accuracy": accuracy.item(), "recall": recall,
+        result = OrderedDict(metrics={"true_pos": true_pos, "false_pos": false_pos,
+                                      "true_neg": true_neg, "false_neg": false_neg,
+                                      "accuracy": accuracy.item(), "recall": recall,
                                       "precision": precision, "f1_score": f1_score,
-                                      "roc_auc": roc_auc, "val_loss": val_loss})
+                                      "roc_auc": roc_auc, "val_loss": val_loss, "mcc": mcc})
         return result
