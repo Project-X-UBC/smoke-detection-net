@@ -10,7 +10,7 @@ We achieve 3 − 4% improvement over baseline for a 4x4 mesh and empirically est
 As a secondary contribution, we release the first smoke-annotated video dataset which consists of 139 hours of footage 
 from PTZ cameras across 678 videos. 
 
-![alt-text-1](figures/im1_raw.png "raw-image") ![alt-text-2](figures/im1_gr_2.png "mesh-size-2x2") ![alt-text-3](figures/im1_gr_4.png "mesh-size-4x4") ![alt-text-4](figures/im1_gr_8.png "mesh-size-8x8")
+![alt-text-2](figures/im1_gr_2.png "mesh-size-2x2") ![alt-text-3](figures/im1_gr_4.png "mesh-size-4x4") ![alt-text-4](figures/im1_gr_8.png "mesh-size-8x8")
 
 Above are sample predictions with mesh sizes 2x2, 4x4, and 8x8 (TP = green, FP = blue, TN = unshaded).
 
