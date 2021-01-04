@@ -38,6 +38,11 @@ python main.py
 Data is generally pulled from the **data/** directory and model outputs are stored inside **output/**.
 Make sure to specify a new directory name for each training run by setting the parameter `output_dir` inside **main.py**.
 
+## Notebooks
+The notebook **visualize_prediction_results.ipynb** inside **notebooks** is a great tool for visualizing model 
+predictions and comparing them to ground truth labels. We have made a [google colab version](https://colab.research.google.com/drive/1Xb7psgLqOoQGZnB2HRXxZEfHOzLu1AhM?usp=sharing)
+of this notebook which outputs predictions from 4x4 gridded images fed into a trained model.
+
 ## Generating dataset dicts
 Detectron2 expects a specific format for the metadata json files. The script **make_real_data_json.py** inside **src/tools** 
 takes care of this step. It takes in as an argument the directory containing image data and produces a json file for the 
@@ -64,10 +69,6 @@ A critical parameter of our approach is the grid size. We have experimented with
 different sizes, the first step is to generate properly formatted labels similar to the 'mini' dataset. The model expects
 the labels to be in a list format e.g. [1, 0, 0, 1] for a 2x2 grid. To modify the final output layer of the network, edit
 the value of the `num_classes` parameter inside `set_params()` of **main.py**.
-
-## Notebooks
-The notebook [visualize_prediction_results.ipynb](https://github.com/Project-X-UBC/smoke-detection-net/blob/main/notebooks/visualize_prediction_results.ipynb)
-is a great tool for visualizing model predictions and comparing them to ground truth labels. 
 
 ## Google Cloud Platform
 We trained all of our models using the GCP compute engine and found some useful resources which we have added below.
