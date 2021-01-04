@@ -1,6 +1,6 @@
 # smoke-detection-net
 This project is part of our submission for [ProjectX 2020](https://www.projectx2020.com/),
-a 3-month machine learning competition with a focus on climate change.
+a 3-month machine learning competition with a focus on climate change. The following is a link to our submission for our final research paper — [link](https://rdesc.dev/project_x_final.pdf).
 
 ### Summary of project
 
