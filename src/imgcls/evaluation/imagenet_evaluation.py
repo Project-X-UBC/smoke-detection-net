@@ -113,7 +113,6 @@ class ImageNetEvaluator(DatasetEvaluator):
         # compute Matthews correlation coefficient (MCC)
         mcc = matthews_corrcoef(target, pred)
 
-        # FIXME naive metrics
         accuracy = correct.sum().true_divide(torch.tensor(correct.size(0)))
         confusion_vector = (pred // target)
         # Element-wise division of the 2 tensors returns a new tensor which holds a
