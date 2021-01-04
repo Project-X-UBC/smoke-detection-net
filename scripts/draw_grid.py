@@ -89,14 +89,17 @@ def get_pred_and_true(filename, gridsize):
     return pred, true
 
 
-def draw_pred_vs_true(img, pred, true, gridsize):
+def draw_pred_vs_true(img, pred, true, gridsize, show_labels=True):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     exclusive = np.vectorize(lambda x, y: 1 if x == 1 and y == 0 else 0)
     pred_only, true_only = exclusive(pred, true), exclusive(true, pred)
     both = pred & true
-    img = draw_grid(img, pred_only, (0, 0, 255), gridsize)
-    img = draw_grid(img, true_only, (255, 0, 0), gridsize)
-    img = draw_grid(img, both, (0, 255, 0), gridsize)
+    if show_labels:
+        img = draw_grid(img, pred_only, (0, 0, 255), gridsize)  # FP = blue
+        img = draw_grid(img, true_only, (255, 0, 0), gridsize)  # FN = red
+        img = draw_grid(img, both, (0, 255, 0), gridsize)       # TP = green
+    else:
+        img = draw_grid(img, pred_only, (0, 255, 0), gridsize)  # preds = green
     return img
 
 
