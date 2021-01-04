@@ -25,9 +25,11 @@ and generates sample metadata json files for the data loaders. NOTE, restarting 
 for the conda environment to be activated.
 
 ## Dataset
-We annotated videos scraped from the [Nevada Seismological Laboratory](https://www.youtube.com/user/nvseismolab/featured) 
-YouTube channel. Raw annotations as well as properly formatted labels are available for download [here](https://archive.org/details/smoke_ubc_projectx) 
-(requires a torrent client). 
+We scraped wildfire footage from the [Nevada Seismological Laboratory](https://www.youtube.com/user/nvseismolab/featured) 
+YouTube channel. Raw footage was annotated using the Computer Vision Annotation Tool (CVAT). These bounding box annotations
+were then converted to grid labels. The [data_diagram.png](https://raw.githubusercontent.com/Project-X-UBC/smoke-detection-net/main/figures/data_diagram.png)
+provides an overview of our data generation pipeline. Raw annotations as well as grid formatted labels are 
+available for download [here](https://archive.org/details/smoke_ubc_projectx) (requires a torrent client).
 
 ## Running pipeline
 Modify parameters in the `set_params()` method inside **main.py** and then run:
