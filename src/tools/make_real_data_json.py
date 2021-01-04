@@ -13,8 +13,11 @@ DATA_FOLDER = os.path.abspath('../../data/full/frames_100_final')
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Make real dataset")
-    parser.add_argument('--path', type=str, help="Path of the directory containing the image data", required=False)
-    parser.add_argument('--gridsize', type=int, help="Size of the label grid", required=False)
+    parser.add_argument('--path', type=str, help="Path of the directory containing the image data, directory must "
+                                                 "have 'frames' directory storing .png files and corresponding "
+                                                 "'labels.json' file", required=False)
+    parser.add_argument('--gridsize', type=int, help="Size of the label grid, directory must have corresponding label file e.g. "
+                                                     "for grid size 16 must have labels_16.json", required=False)
     parser.add_argument('--mankind', type=str, help="Use if you want AI for Mankind. --mankind val or --mankind test, depending on which set you want it for.")
     args = parser.parse_args()
     if args.path is not None:
@@ -57,7 +60,8 @@ def split_files(dataset_dicts, image_root):
 
 def accumulate_real_data_json(image_root, grid_size):
     print('Accumulating the JSON...')
-    json_filename = os.path.join(image_root, 'labels.json')
+    labels_file = f'labels_{grid_size}.json' if grid_size else 'labels.json'
+    json_filename = os.path.join(image_root, labels_file)
     with open(json_filename, 'rb') as f:
         labels = json.load(f)['labels']
     filenames = np.array(os.listdir(os.path.join(image_root, 'frames')))
@@ -102,16 +106,12 @@ def make_real_data_main(args):
     # unify_files()
     if args.path is None:
         args.path = DATA_FOLDER
-    if args.gridsize is None:
-        args.gridsize = 4
     if args.mankind in ('val', 'test'):
         mankind_set = make_mankind_set(args)
         with open(os.path.join(args.path, f"{args.mankind}.json"), "w") as w_obj:
             json.dump(mankind_set, w_obj)
         return
     dataset_dicts = accumulate_real_data_json(args.path, args.gridsize)
-    # Accumulate val
-    # Save
     print('Saving the JSON files...')
     with open(os.path.join(args.path, "train.json"), "w") as w_obj:
         json.dump(dataset_dicts['train'], w_obj)

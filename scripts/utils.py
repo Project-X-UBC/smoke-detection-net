@@ -76,19 +76,18 @@ def compute_params(config_path: str):
 
 
 def plot_loss(output_dir):
-    # FIXME
     """
     Plot loss from the 'metrics.json' file
     """
     data = []
     with jsonlines.open(os.path.join(output_dir, 'metrics.json')) as reader:
         for obj in reader:
-            if 'total_loss' in obj.keys() and 'val_loss' in obj.keys():
+            if 'total_loss' in obj.keys():  # and 'val_loss' in obj.keys():
                 data.append(obj)
 
     df = pd.json_normalize(data)
     plt.plot(df['iteration'], df['total_loss'], label='Training')
-    plt.plot(df['iteration'], df['val_loss'], label='Validation')
+    # plt.plot(df['iteration'], df['val_loss'], label='Validation')
     plt.xlabel('iteration #, 1 epoch = %i iterations' %
                compute_params(os.path.join(output_dir, 'config.yaml'))['one_epoch'])
     plt.ylabel("Loss")

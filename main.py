@@ -121,7 +121,7 @@ def set_params():
         'data_dir': './data/full/frames_100',
         'output_dir': './output/resnet-50',  # default is ./output/$date_$time if left as empty string
         'model_weights': 'detectron2://ImageNetPretrained/MSRA/R-50.pkl',  # path to model weights file for training with pretrained weights
-                                                                 # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
+                                                                           # resnet-50 pretrained weights 'detectron2://ImageNetPretrained/MSRA/R-50.pkl'
 
         # hyperparameters
         'base_lr': 0.0001,
