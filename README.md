@@ -29,7 +29,7 @@ We scraped wildfire footage from the [Nevada Seismological Laboratory](https://w
 YouTube channel. Raw footage was annotated using the Computer Vision Annotation Tool (CVAT). These bounding box annotations
 were then converted to grid labels. The [data_diagram.png](https://raw.githubusercontent.com/Project-X-UBC/smoke-detection-net/main/figures/data_diagram.png)
 provides an overview of our data generation pipeline. Raw annotations as well as grid formatted labels are 
-available for download [here](https://archive.org/details/smoke_ubc_projectx) (requires a torrent client).
+available for download [here](https://archive.org/details/smokenet-projectx) (requires 20GB of storage).
 
 ## Running pipeline
 Modify parameters in the `set_params()` method inside **main.py** and then run:
